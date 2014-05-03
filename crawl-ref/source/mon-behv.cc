@@ -1167,9 +1167,7 @@ static bool _mons_check_foe(monster* mon, const coord_def& p,
         && summon_can_attack(mon, p)
         && (friendly || !is_sanctuary(p))
         && (crawl_state.game_is_zotdef() || !mons_is_firewood(foe)))
-    {
             // Zotdef allies take out firewood
-    }
     {
         return true;
     }
