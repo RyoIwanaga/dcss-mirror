@@ -164,7 +164,9 @@ bool player::is_habitable_feat(dungeon_feature_type actual_grid) const
             || species == SP_DJINNI
 #endif
             )
+    {
         return true;
+    }
 
     if (actual_grid == DNGN_LAVA && species != SP_LAVA_ORC
         || actual_grid == DNGN_DEEP_WATER && !can_swim())

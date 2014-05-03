@@ -960,7 +960,9 @@ int armour_max_enchant(const item_def &item)
     if (eq_slot == EQ_BODY_ARMOUR
         || item.sub_type == ARM_CENTAUR_BARDING
         || item.sub_type == ARM_NAGA_BARDING)
+    {
         max_plus = property(item, PARM_AC);
+    }
     else if (eq_slot == EQ_SHIELD)
         max_plus = 3;
 
@@ -2356,7 +2358,9 @@ bool gives_ability(const item_def &item)
 
         if (ego == SPARM_DARKNESS || ego == SPARM_FLYING
             || ego == SPARM_JUMPING)
+        {
             return true;
+        }
         break;
     }
     default:

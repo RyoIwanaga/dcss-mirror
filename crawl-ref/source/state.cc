@@ -524,9 +524,11 @@ void game_state::dump()
     {
         fprintf(stderr, "Other gods acting:\n");
         for (unsigned int i = 0; i < god_act_stack.size(); i++)
+        {
             fprintf(stderr, "God %s with depth %d\n",
                     god_name(god_act_stack[i].which_god).c_str(),
                     god_act_stack[i].depth);
+        }
         fprintf(stderr, "\n\n");
     }
 
@@ -541,8 +543,10 @@ void game_state::dump()
     {
         fprintf(stderr, "Others monsters acting:\n");
         for (unsigned int i = 0; i < mon_act_stack.size(); i++)
+        {
             fprintf(stderr, "    %s\n",
                     debug_mon_str(mon_act_stack[i]).c_str());
+        }
     }
 }
 

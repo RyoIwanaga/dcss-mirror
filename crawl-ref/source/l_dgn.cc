@@ -225,9 +225,11 @@ static int dgn_change_level_flags(lua_State *ls)
 static void _chance_magnitude_check(lua_State *ls, int which_par, int chance)
 {
     if (chance < 0 || chance > CHANCE_ROLL)
+    {
         luaL_argerror(ls, which_par,
                       make_stringf("Chance must be in the range [0,%d]",
                                    CHANCE_ROLL).c_str());
+    }
 }
 
 static int dgn_chance(lua_State *ls)
@@ -1526,9 +1528,11 @@ LUAFN(dgn_with_map_anchors)
         for (i = 1; i < top; i += 2)
         {
             if (lua_isnumber(ls, i) && lua_isnumber(ls, i + 1))
+            {
                 map_anchor_points.push_back(
                                             coord_def(lua_tointeger(ls, i),
                                                       lua_tointeger(ls, i + 1)));
+            }
         }
 
         ASSERT(lua_isfunction(ls, -1));

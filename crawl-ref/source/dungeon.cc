@@ -2029,8 +2029,10 @@ static void _build_overflow_temples()
                 vault = random_map_for_tag(vault_tag, true);
 #ifdef DEBUG_TEMPLES
                 if (vault == NULL)
+                {
                     mprf(MSGCH_DIAGNOSTICS, "Couldn't find overflow temple "
                          "for combination of tags %s", vault_tag.c_str());
+                }
 #endif
             }
 
@@ -3456,7 +3458,9 @@ static coord_def _dgn_random_point_in_bounds(dungeon_feature_type searchfeat,
             const coord_def c = random_in_bounds();
             if (_point_matches_feat(c, searchfeat, mapmask, adjacent_feat,
                                     monster_free))
+            {
                 return c;
+            }
         }
         return coord_def(0, 0);
     }
@@ -3557,8 +3561,10 @@ static void _place_branch_entrances(bool use_vaults)
                 lowercase(entry_tag);
 
                 if (_place_vault_by_tag(entry_tag))
+                {
                     // Placed this entrance, carry on to subsequent branches
                     continue;
+                }
             }
 
             // Otherwise place a single stair feature.

@@ -211,6 +211,7 @@ bool monster_can_submerge(const monster* mon, dungeon_feature_type feat)
     if (!mon->is_habitable_feat(feat))
         return false;
     if (mons_class_flag(mon->type, M_SUBMERGES))
+    {
         switch (mons_habitat(mon))
         {
         case HT_WATER:
@@ -225,6 +226,7 @@ bool monster_can_submerge(const monster* mon, dungeon_feature_type feat)
         default:
             return false;
         }
+    }
     else
         return false;
 }
@@ -3071,9 +3073,11 @@ static monster_type _band_member(band_type band, int which)
                                       0);
     case BAND_DEEP_TROLLS:
         if (one_chance_in(4))
+        {
             return random_choose(MONS_DEEP_TROLL_EARTH_MAGE,
                                  MONS_DEEP_TROLL_SHAMAN,
                                  -1);
+        }
         return MONS_DEEP_TROLL;
     case BAND_HOGS:
         return MONS_HOG;
@@ -3178,10 +3182,12 @@ static monster_type _band_member(band_type band, int which)
 
     case BAND_VAULT_WARDEN:
         if (which == 1 || which == 2 && coinflip())
+        {
             return random_choose_weighted( 8, MONS_VAULT_SENTINEL,
                                           12, MONS_IRONBRAND_CONVOKER,
                                           10, MONS_IRONHEART_PRESERVER,
                                            0);
+        }
         else
             return MONS_VAULT_GUARD;
 
@@ -3300,10 +3306,12 @@ static monster_type _band_member(band_type band, int which)
 
     case BAND_PUTRID_DEMONSPAWN:
         if (which == 1 || one_chance_in(5))
+        {
             return random_choose_weighted( 2, MONS_HELLWING,
                                            2, MONS_ORANGE_DEMON,
                                            3, MONS_PUTRID_DEMONSPAWN,
                                            0);
+        }
         return random_demonspawn_monster_species();
 
     case BAND_TORTUROUS_DEMONSPAWN:

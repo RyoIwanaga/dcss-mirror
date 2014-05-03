@@ -772,8 +772,10 @@ static bool _blessed_damages_victim(bolt &beam, actor* victim, int &dmg,
         dmg += 1 + random2(dmg * 15) / 10;
 
         if (!beam.is_tracer && you.can_see(victim))
+        {
            dmg_msg = victim->name(DESC_THE) + " "
                    + victim->conj_verb("convulse") + "!";
+        }
     }
 
     return false;

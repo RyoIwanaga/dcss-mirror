@@ -290,8 +290,10 @@ void level_range::set(const string &br, int s, int d) throw (string)
     deepest    = d;
 
     if (deepest < shallowest || deepest <= 0)
+    {
         throw make_stringf("Level-range %s:%d-%d is malformed",
                            br.c_str(), s, d);
+    }
 }
 
 level_range level_range::parse(string s) throw (string)
@@ -2588,9 +2590,11 @@ void map_def::copy_hooks_from(const map_def &other_map, const string &hook_name)
     const dlua_set_map mset(this);
     if (!dlua.callfn("dgn_map_copy_hooks_from", "ss",
                      other_map.name.c_str(), hook_name.c_str()))
+    {
         mprf(MSGCH_ERROR, "Lua error copying hook (%s) from '%s' to '%s': %s",
              hook_name.c_str(), other_map.name.c_str(),
              name.c_str(), dlua.error.c_str());
+    }
 }
 
 // Runs Lua hooks registered by the map's Lua code, if any. Returns true if
@@ -2601,9 +2605,11 @@ bool map_def::run_hook(const string &hook_name, bool die_on_lua_error)
     if (!dlua.callfn("dgn_map_run_hook", "s", hook_name.c_str()))
     {
         if (die_on_lua_error)
+        {
             end(1, false, "Lua error running hook '%s' on map '%s': %s",
                 hook_name.c_str(), name.c_str(),
                 rewrite_chunk_errors(dlua.error).c_str());
+        }
         else
             mprf(MSGCH_ERROR, "Lua error running hook '%s' on map '%s': %s",
                  hook_name.c_str(), name.c_str(),
@@ -4818,8 +4824,10 @@ static int _str_to_ego(item_spec &spec, string ego_str)
 
         for (int j = 0; list[j] != NULL; j++)
             if (ego_str == list[j])
+            {
                 // Ego incompatible with base type.
                 return -1;
+            }
     }
 
     // Non-existent ego

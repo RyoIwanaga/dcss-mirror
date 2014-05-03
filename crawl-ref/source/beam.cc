@@ -1186,9 +1186,11 @@ void bolt::affect_cell()
         // Note that this can change the ray position and the solidity
         // of the wall.
         if (hit_wall())
+        {
             // Beam ended due to hitting wall, so don't hit the player
             // or monster with the regressed beam.
             return;
+        }
     }
 
     // If the player can ever walk through walls, this will need
@@ -4821,8 +4823,10 @@ void bolt::affect_monster(monster* mon)
             if (hit_verb.empty())
                 hit_verb = engulfs ? "engulfs" : "hits";
             if (mons_near(mon))
+            {
                 mprf("The %s %s %s.", name.c_str(), hit_verb.c_str(),
                      mon->name(DESC_THE).c_str());
+            }
             else if (heard && !noise_msg.empty())
                 mprf(MSGCH_SOUND, "%s", noise_msg.c_str());
         }
@@ -5575,7 +5579,9 @@ mon_resist_type bolt::apply_enchantment_to_monster(monster* mon)
                                        (mon->body_size(PSIZE_BODY) > SIZE_BIG)
                                         ? " is filled with an intense inner flame!"
                                         : " is filled with an inner flame."))
+            {
                 obvious_effect = true;
+            }
         }
         return MON_AFFECTED;
 
@@ -5628,8 +5634,10 @@ mon_resist_type bolt::apply_enchantment_to_monster(monster* mon)
             mon_enchant ench = mon->get_ench(ENCH_POISON);
             poison_monster(mon, agent(), ench.degree, false, false);
             if (you.can_see(mon))
+            {
                 mprf("The poison in %s body grows stronger.",
                      mon->name(DESC_ITS).c_str());
+            }
         }
 
         if (mon->check_res_magic(ench_power) > 0)

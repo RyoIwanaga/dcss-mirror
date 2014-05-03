@@ -1092,8 +1092,10 @@ void wizard_god_wrath()
     }
 
     if (!divine_retribution(you.religion, true, true))
+    {
         // Currently only dead Jiyva.
         mpr("You're not eligible for wrath.");
+    }
 }
 
 void wizard_god_mollify()

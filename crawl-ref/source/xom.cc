@@ -2843,7 +2843,9 @@ static int _xom_player_confusion_effect(int sever, bool debug = false)
         for (adjacent_iterator ai(you.pos()); ai; ++ai)
             if (in_bounds(*ai) && is_feat_dangerous(grd(*ai))
                 && !you.can_cling_to(*ai))
+            {
                 return XOM_DID_NOTHING;
+            }
     }
 
     if (debug)

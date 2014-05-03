@@ -375,9 +375,11 @@ bool melee_attack::handle_phase_attempted()
     if (attk_flavour == AF_SHADOWSTAB && defender && !defender->can_see(attacker))
     {
         if (you.see_cell(attack_position))
+        {
             mprf("%s strikes at %s from the darkness!",
                  attacker->name(DESC_THE, true).c_str(),
                  defender->name(DESC_THE).c_str());
+        }
         to_hit = AUTOMATIC_HIT;
         needs_message = false;
     }

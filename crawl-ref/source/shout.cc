@@ -619,7 +619,9 @@ void check_monsters_sense(sense_type sense, int range, const coord_def& where)
         case SENSE_WEB_VIBRATION:
             if (!mons_class_flag(mi->type, M_WEB_SENSE)
                 && !mons_class_flag(get_chimera_legs(*mi), M_WEB_SENSE))
+            {
                 break;
+            }
             if (!one_chance_in(4))
             {
                 if (coinflip())
@@ -860,9 +862,11 @@ bool noise_grid::propagate_noise_to_neighbour(int base_attenuation,
                                   cell.noise_id,
                                   travel_distance,
                                   next_pos - current_pos))
+        {
             // Return true only if we hadn't already registered this
             // cell as a neighbour (presumably with a lower volume).
             return neighbour_old_distance != travel_distance;
+        }
     }
     return false;
 }
@@ -1037,9 +1041,11 @@ void noise_grid::write_cell(FILE *outf, coord_def p, int ch) const
 {
     const int intensity = min(25, cells(p).noise_intensity_millis / 1000);
     if (intensity)
+    {
         fprintf(outf,
                 "<span class='i%d'>&#%d;</span>",
                 intensity, ch);
+    }
     else
         fprintf(outf, "<span>&#%d;</span>", ch);
 }

@@ -167,8 +167,10 @@ LUAFN(debug_cull_monsters)
     for (int il = 0; il < MAX_MONSTERS; il++)
     {
         if (menv[il].type == MONS_NO_MONSTER)
+        {
             // At least one empty space in menv
             return 0;
+        }
     }
 
     mprf(MSGCH_DIAGNOSTICS, "menv[] is full, dismissing non-near monsters");

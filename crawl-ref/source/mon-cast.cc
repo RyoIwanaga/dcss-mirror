@@ -1806,7 +1806,9 @@ static bool _ms_waste_of_time(const monster* mon, spell_type monspell)
             if (mons_aligned(mon, *mi) && !mi->has_ench(ENCH_CHARM)
                 && *mi != mon && mon->see_cell_no_trans(mi->pos())
                 && !mi->has_ench(ENCH_INJURY_BOND))
+            {
                     return false; // We found at least one target; that's enough.
+            }
         }
         ret = true;
         break;
@@ -1930,7 +1932,9 @@ static bool _ms_waste_of_time(const monster* mon, spell_type monspell)
             && !adjacent(you.pos(), mon->pos())
             || (mon->foe != MHITYOU && mon->foe != MHITNOT
                 && !adjacent(menv[mon->foe].pos(), mon->pos())))
+        {
             ret = true;
+        }
         break;
 
     case SPELL_PORTAL_PROJECTILE:
@@ -3301,7 +3305,9 @@ bool handle_mon_spell(monster* mons, bolt &beem)
         {
             if (cast_los_attack_spell(spell_cast, mons->spell_hd(spell_cast),
                                       mons, false) != SPRET_SUCCESS)
+            {
                 return false;
+            }
         }
         else if (spell_cast == SPELL_OLGREBS_TOXIC_RADIANCE)
         {
@@ -4740,8 +4746,10 @@ void mons_cast(monster* mons, bolt &pbolt, spell_type spell_cast,
     case SPELL_STONESKIN:
     {
         if (you.can_see(mons))
+        {
             mprf("%s skin hardens.",
                  apostrophise(mons->name(DESC_THE)).c_str());
+        }
         const int power = (mons->spell_hd(spell_cast) * 15) / 10;
         mons->add_ench(mon_enchant(ENCH_STONESKIN, 0, mons,
                        BASELINE_DELAY * (10 + (2 * random2(power)))));

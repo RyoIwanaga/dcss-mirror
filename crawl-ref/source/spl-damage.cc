@@ -1330,8 +1330,10 @@ bool mons_shatter(monster* caster, bool actual)
     if (actual)
     {
         if (silence)
+        {
             mprf("The dungeon shakes around %s!",
                  caster->name(DESC_THE).c_str());
+        }
         else
         {
             noisy(30, caster->pos(), caster->mindex());

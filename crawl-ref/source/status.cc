@@ -755,7 +755,9 @@ static void _describe_glow(status_info* inf)
                 || you.species != SP_DJINNI
 #endif
                 )
+        {
             inf->light_text = "Contam";
+        }
     }
 
     if (cont > 0)

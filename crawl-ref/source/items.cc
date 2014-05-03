@@ -3881,9 +3881,11 @@ item_info get_item_info(const item_def& item)
         else
         {
             if (item.sub_type >= MISC_DECK_OF_ESCAPE && item.sub_type <= MISC_DECK_OF_DEFENCE)
+            {
                 ii.sub_type = NUM_MISCELLANY; // Needs to be changed if we add other
                                               // miscellaneous items that can be
                                               // non-identified
+            }
             else
                 ii.sub_type = item.sub_type;
         }

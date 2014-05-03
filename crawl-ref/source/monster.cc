@@ -1921,7 +1921,9 @@ bool monster::pickup_armour(item_def &item, int near, bool force)
 
         if (eq != EQ_HELMET && eq != EQ_SHIELD
             && mons_genus(type) == MONS_OCTOPODE)
+        {
             return false;
+        }
     }
 
     // Bardings are only wearable by the appropriate monster.
@@ -3015,8 +3017,10 @@ bool monster::go_frenzy(actor *source)
     mons_att_changed(this);
 
     if (simple_monster_message(this, " flies into a frenzy!"))
+    {
         // Xom likes monsters going insane.
         xom_is_stimulated(friendly() ? 25 : 100);
+    }
 
     return true;
 }
@@ -3047,8 +3051,10 @@ void monster::go_berserk(bool intentional, bool /* potion */)
 
     add_ench(ENCH_BERSERK);
     if (simple_monster_message(this, " goes berserk!"))
+    {
         // Xom likes monsters going berserk.
         xom_is_stimulated(friendly() ? 25 : 100);
+    }
 
     if (const item_def* w = weapon())
     {
@@ -3278,16 +3284,20 @@ bool monster::backlit(bool check_haloed, bool self_halo) const
     if (has_ench(ENCH_CORONA) || has_ench(ENCH_STICKY_FLAME) || has_ench(ENCH_SILVER_CORONA))
         return true;
     if (check_haloed)
+    {
         return !umbraed() && haloed() &&
                (self_halo || halo_radius2() == -1);
+    }
     return false;
 }
 
 bool monster::umbra(bool check_haloed, bool self_halo) const
 {
     if (check_haloed)
+    {
         return umbraed() && !haloed() &&
                (self_halo || umbra_radius2() == -1);
+    }
     return false;
 }
 
@@ -3483,8 +3493,10 @@ void monster::blame_damage(const actor* attacker, int amount)
     ASSERT(amount >= 0);
     damage_total = min<int>(MAX_DAMAGE_COUNTER, damage_total + amount);
     if (attacker)
+    {
         damage_friendly = min<int>(MAX_DAMAGE_COUNTER * 2,
                       damage_friendly + amount * exp_rate(attacker->mindex()));
+    }
 }
 
 void monster::suicide(int hp)
@@ -5830,12 +5842,14 @@ void monster::react_to_damage(const actor *oppressor, int damage,
             {
                 hit_points = 0;
                 if (observable())
+                {
                     mprf("As %s mount dies, %s plunges down into %s!",
                          pronoun(PRONOUN_POSSESSIVE).c_str(),
                          name(DESC_THE).c_str(),
                          grd(pos()) == DNGN_LAVA ?
                              "lava and is incinerated" :
                              "deep water and drowns");
+                }
             }
             else if (fly_died && observable())
             {

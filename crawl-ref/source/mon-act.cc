@@ -1749,7 +1749,9 @@ static void _pre_monster_move(monster* mons)
             {
                 if (mons->props["foe_pos"].get_coord().distance_from(mons->pos())
                     > foe->pos().distance_from(mons->pos()))
+                {
                     mons->props["foe_approaching"].get_bool() = true;
+                }
                 else
                     mons->props["foe_approaching"].get_bool() = false;
 
@@ -3702,7 +3704,9 @@ static bool _may_cutdown(monster* mons, monster* targ)
         // Don't try to attack briars unless their damage will be insignificant
         if (targ->type == MONS_BRIAR_PATCH && mons->type != MONS_THORN_HUNTER
             && (mons->armour_class() * mons->hit_points) < 400)
+        {
             return false;
+        }
         else
             return true;
     }

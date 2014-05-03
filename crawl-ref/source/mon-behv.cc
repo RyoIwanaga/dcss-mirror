@@ -820,8 +820,10 @@ void handle_behaviour(monster* mon)
                     && !mon->berserk_or_insane())
                 {
                     if (mon->attitude != ATT_FRIENDLY)
+                    {
                         // Get to firing range even if we are close.
                         _set_firing_pos(mon, you.pos());
+                    }
                 }
                 else if (_stabber_keep_distance(mon, &you))
                 {
@@ -1165,7 +1167,9 @@ static bool _mons_check_foe(monster* mon, const coord_def& p,
         && summon_can_attack(mon, p)
         && (friendly || !is_sanctuary(p))
         && (crawl_state.game_is_zotdef() || !mons_is_firewood(foe)))
+    {
             // Zotdef allies take out firewood
+    }
     {
         return true;
     }

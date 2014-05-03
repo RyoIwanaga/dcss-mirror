@@ -773,8 +773,10 @@ static bool _sack_of_spiders(item_def &sack)
                 int chance = 100 - (100 * (you.pos().range(*ri) - 1) / rad)
                              - 2 * (27 - you.skill(SK_EVOCATIONS));
                 if (x_chance_in_y(chance,100) && place_specific_trap(*ri, TRAP_WEB))
+                {
                     // Reveal the trap
                     grd(*ri) = DNGN_TRAP_WEB;
+                }
             }
         }
         mpr("...and things crawl out!");

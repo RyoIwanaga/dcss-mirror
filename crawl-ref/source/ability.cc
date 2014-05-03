@@ -1415,8 +1415,10 @@ static bool _check_ability_possible(const ability_def& abil,
         if (tal.is_invocation)
         {
             if (!quiet)
+            {
                 mprf("You cannot call out to %s while silenced.",
                      god_name(you.religion).c_str());
+            }
             return false;
         }
     }
@@ -1426,8 +1428,10 @@ static bool _check_ability_possible(const ability_def& abil,
     {
         const int expected_hunger = you.hunger - abil.food_cost * 2;
         if (!quiet)
+        {
             dprf("hunger: %d, max. food_cost: %d, expected hunger: %d",
                  you.hunger, abil.food_cost * 2, expected_hunger);
+        }
         // Safety margin for natural hunger, mutations etc.
         if (expected_hunger <= 50)
         {
