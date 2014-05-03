@@ -2810,9 +2810,11 @@ string map_def::validate_map_def(const depth_ranges &default_depths)
     if (has_tag("abyss") || has_tag("abyss_rune"))
     {
         if (orient == MAP_ENCOMPASS)
+        {
             return make_stringf(
                 "Map '%s' cannot use 'encompass' orientation in the abyss",
                 name.c_str());
+        }
 
         const int max_abyss_map_width =
             GXM / 2 - MAPGEN_BORDER - ABYSS_AREA_SHIFT_RADIUS;

@@ -4119,7 +4119,9 @@ static coord_def _mons_fragment_target(monster *mons)
         bolt beam;
         if (!setup_fragmentation_beam(beam, pow, mons, *di, false, true, true,
                                       NULL, temp, temp))
+        {
             continue;
+        }
 
         beam.range = range;
         fire_tracer(mons, beam, true);
@@ -4129,7 +4131,9 @@ static coord_def _mons_fragment_target(monster *mons)
         bolt beam2;
         if (!setup_fragmentation_beam(beam2, pow, mons, *di, false, false, true,
                                       NULL, temp, temp))
+        {
             continue;
+        }
 
         beam2.range = range;
         fire_tracer(mons, beam2, true);
@@ -4872,10 +4876,12 @@ void mons_cast(monster* mons, bolt &pbolt, spell_type spell_cast,
     case SPELL_SUMMON_ELEMENTAL:
     {
         if (summon_type == MONS_NO_MONSTER)
+        {
             summon_type = random_choose(
                               MONS_EARTH_ELEMENTAL, MONS_FIRE_ELEMENTAL,
                               MONS_AIR_ELEMENTAL, MONS_WATER_ELEMENTAL,
                               -1);
+        }
 
         if (_mons_abjured(mons, monsterNearby))
             return;

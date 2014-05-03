@@ -504,7 +504,9 @@ bool curse_an_item(bool ignore_holy_wrath)
 
             if (ignore_holy_wrath && you.inv[i].base_type == OBJ_WEAPONS
                 && get_weapon_brand(you.inv[i]) == SPWPN_HOLY_WRATH)
+            {
                 continue;
+            }
 
             // Item is valid for cursing, so we'll give it a chance.
             count++;
@@ -1489,8 +1491,7 @@ bool is_brandable_weapon(const item_def &wpn, bool allow_ranged)
         return false;
     }
 
-    if (you.duration[DUR_WEAPON_BRAND] != 0
-        && you.weapon() == &wpn)
+    if (you.duration[DUR_WEAPON_BRAND] != 0 && you.weapon() == &wpn)
         return false;
 
     return true;

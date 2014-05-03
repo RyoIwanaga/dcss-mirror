@@ -1106,7 +1106,9 @@ monster* place_monster(mgen_data mg, bool force_pos, bool dont_place)
     if (mon->mindex() >= MAX_MONSTERS - 30
         || (mg.proximity == PROX_NEAR_STAIRS && !crawl_state.game_is_zotdef())
         || (crawl_state.game_is_zotdef() && you.num_turns < 2000))
+    {
         return mon;
+    }
 
     // Not PROX_NEAR_STAIRS, so it will be part of a band, if there is any.
     if (band_size > 1)
@@ -1290,6 +1292,7 @@ static monster* _place_monster_aux(const mgen_data &mg, const monster *leader,
 
     // Pick the correct Serpent of Hell.
     if (mon->type == MONS_SERPENT_OF_HELL)
+    {
         switch (place.branch)
         {
         case BRANCH_COCYTUS:
@@ -1303,6 +1306,7 @@ static monster* _place_monster_aux(const mgen_data &mg, const monster *leader,
             break;
         default: ; // if it spawns out of Hell (sprint, wizmode), use Gehenna
         }
+    }
 
     // Generate a brand shiny new monster, or zombie.
     if (mons_class_is_zombified(mg.cls))

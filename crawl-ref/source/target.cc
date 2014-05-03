@@ -158,7 +158,9 @@ aff_type targetter_beam::is_affected(coord_def loc)
         if (cell_is_solid(*i)
             && beam.affects_wall(grd(*i)) != MB_TRUE
             && max_expl_rad > 0)
+        {
             break;
+        }
 
         c = *i;
         if (c == loc)
@@ -237,7 +239,9 @@ bool targetter_imb::set_aim(coord_def a)
         if (!(anyone_there(c)
               && !beam.ignores_monster((monster_at(c))))
             && c != end)
+        {
             continue;
+        }
 
         vector<coord_def> *which_splash = (first) ? &splash : &splash2;
 

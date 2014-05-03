@@ -294,11 +294,11 @@ bool add_spell_to_memory(spell_type spell)
     }
     // If we didn't find a label above, choose the first available one.
     if (j == -1)
+    {
         for (j = 0; j < 52; j++)
-        {
             if (you.spell_letter_table[j] == -1)
                 break;
-        }
+    }
 
     you.spell_letter_table[j] = i;
 

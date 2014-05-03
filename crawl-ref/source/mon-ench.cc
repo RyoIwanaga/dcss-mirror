@@ -619,7 +619,7 @@ void monster::remove_enchantment_effect(const mon_enchant &me, bool quiet)
 
     case ENCH_CORONA:
     case ENCH_SILVER_CORONA:
-    if (!quiet)
+        if (!quiet)
         {
             if (visible_to(&you))
                 simple_monster_message(this, " stops glowing.");

@@ -684,8 +684,7 @@ bool can_wear_armour(const item_def &item, bool verbose, bool ignore_temporary)
     if (bad_size)
     {
         if (verbose)
-            mprf("This armour is too %s for you!",
-                 (bad_size > 0) ? "big" : "small");
+            mprf("This armour is too %s for you!", (bad_size > 0) ? "big" : "small");
 
         return false;
     }
@@ -1332,11 +1331,13 @@ static bool _puton_item(int item_slot)
         for (vector<equipment_type>::const_iterator eq_it = ring_types.begin();
              eq_it != ring_types.end();
              ++eq_it)
+        {
             if (!you.slot_item(*eq_it, true))
             {
                 need_swap = false;
                 break;
             }
+        }
 
         if (need_swap)
             return _swap_rings(item_slot);
@@ -2412,8 +2413,12 @@ static bool _handle_enchant_weapon(bool alreadyknown, string *pre_msg, scroll_ty
     if (!weapon)
         return !alreadyknown;
 
-    int acc = (scr == SCR_ENCHANT_WEAPON_I ? 1 : scr == SCR_ENCHANT_WEAPON_II ? 0 : 1 + random2(2));
-    int dam = (scr == SCR_ENCHANT_WEAPON_I ? 0 : scr == SCR_ENCHANT_WEAPON_II ? 1 : 1 + random2(2));
+    int acc = scr == SCR_ENCHANT_WEAPON_I  ? 1
+            : scr == SCR_ENCHANT_WEAPON_II ? 0
+                                           : 1 + random2(2);
+    int dam = scr == SCR_ENCHANT_WEAPON_I  ? 0
+            : scr == SCR_ENCHANT_WEAPON_II ? 1
+                                           : 1 + random2(2);
     enchant_weapon(*weapon, acc, dam, scr == SCR_ENCHANT_WEAPON_I ? "green" :
                                      scr == SCR_ENCHANT_WEAPON_II ? "red"  :
                                      "yellow");

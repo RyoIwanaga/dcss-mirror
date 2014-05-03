@@ -2050,9 +2050,11 @@ static void _build_overflow_temples()
         }
 
         if (vault == NULL)
+        {
             // Might as well build the rest of the level if we couldn't
             // find the overflow temple map, so don't veto the level.
             return;
+        }
 
         {
             dgn_map_parameters mp(vault_tag);
@@ -2777,8 +2779,10 @@ static const map_def *_dgn_random_map_for_place(bool minivault)
     }
 
     if (!vault)
+    {
         // Pick a normal map
         vault = random_map_for_place(lid, minivault, MB_FALSE);
+    }
 
     if (!vault && lid.branch == root_branch && lid.depth == 1)
         vault = random_map_for_tag("arrival", false, false, MB_FALSE);
@@ -4599,7 +4603,9 @@ static void _dgn_give_mon_spec_items(mons_spec &mspec,
 
         if (spec.base_type == OBJ_UNASSIGNED
             || (spec.base_type == OBJ_MISCELLANY && spec.sub_type == MISC_RUNE_OF_ZOT))
+        {
             continue;
+        }
 
         // Don't give monster a randart, and don't randomly give
         // monster an ego item.

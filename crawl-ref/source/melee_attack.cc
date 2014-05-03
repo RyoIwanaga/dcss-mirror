@@ -5409,9 +5409,11 @@ bool melee_attack::_extra_aux_attack(unarmed_attack_type atk, bool is_uc)
         return false;
 
     if (atk == UNAT_CONSTRICT)
+    {
         return is_uc
                 || you.species == SP_NAGA && you.experience_level > 12
                 || you.species == SP_OCTOPODE && you.has_usable_tentacle();
+    }
 
     if (you.strength() + you.dex() <= random2(50))
         return false;

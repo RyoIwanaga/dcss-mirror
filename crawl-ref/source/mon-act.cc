@@ -3342,7 +3342,9 @@ bool mon_can_move_to_pos(const monster* mons, const coord_def& delta,
 
         if (targmonster->type == MONS_TOADSTOOL
             && mons->type == MONS_WANDERING_MUSHROOM)
+        {
             return true;
+        }
 
         // Cut down plants only when no alternative, or they're
         // our target.
@@ -4139,9 +4141,11 @@ static void _heated_area(monster* mons)
     if (final_damage > 0)
     {
         if (mons->observable())
+        {
             mprf("%s is %s by your radiant heat.",
                  mons->name(DESC_THE).c_str(),
                  (final_damage) > 10 ? "blasted" : "burned");
+        }
 
         behaviour_event(mons, ME_DISTURB, 0, mons->pos());
 

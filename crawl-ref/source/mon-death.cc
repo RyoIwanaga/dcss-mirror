@@ -3029,10 +3029,11 @@ void hogs_to_humans()
         if (!(mi->type == MONS_HOG
               || mi->type == MONS_HELL_HOG
               || mi->type == MONS_HOLY_SWINE))
+        {
             continue;
+        }
 
-        if (!mi->props.exists("kirke_band")
-            && !mi->props.exists(ORIG_MONSTER_KEY))
+        if (!mi->props.exists("kirke_band") && !mi->props.exists(ORIG_MONSTER_KEY))
             continue;
 
         // Shapeshifters will stop being a hog when they feel like it.

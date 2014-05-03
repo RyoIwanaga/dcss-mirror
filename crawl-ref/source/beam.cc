@@ -4471,7 +4471,9 @@ static bool _dazzle_monster(monster* mons, actor* act)
 {
     if (mons->holiness() == MH_UNDEAD || mons->holiness() == MH_NONLIVING
         || mons->holiness() == MH_PLANT)
+    {
         return false;
+    }
 
     if (x_chance_in_y(85 - mons->hit_dice * 3 , 100))
     {
@@ -6175,7 +6177,9 @@ void bolt::determine_affected_cells(explosion_map& m, const coord_def& delta,
     if (feat_is_solid(dngn_feat) && !feat_is_wall(dngn_feat)
         && !(delta.origin() && can_affect_wall(dngn_feat))
         && stop_at_statues)
+    {
         return;
+    }
 
     // Check if it passes the callback functions.
     bool hits = true;
@@ -6443,8 +6447,10 @@ string bolt::get_short_name() const
         return short_name;
 
     if (item != NULL && item->defined())
+    {
         return item->name(DESC_A, false, false, false, false,
                           ISFLAG_IDENT_MASK | ISFLAG_COSMETIC_MASK);
+    }
 
     if (real_flavour == BEAM_RANDOM
         || real_flavour == BEAM_CHAOS

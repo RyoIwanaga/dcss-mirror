@@ -2123,8 +2123,10 @@ static void tag_read_you(reader &th)
     you.berserk_penalty   = unmarshallByte(th);
 #if TAG_MAJOR_VERSION == 34
     if (th.getMinorVersion() >= TAG_MINOR_GARGOYLE_DR
-      && th.getMinorVersion() < TAG_MINOR_RM_GARGOYLE_DR)
+        && th.getMinorVersion() < TAG_MINOR_RM_GARGOYLE_DR)
+    {
         unmarshallInt(th); // Slough an integer.
+    }
 
     if (th.getMinorVersion() < TAG_MINOR_AUTOMATIC_MANUALS)
     {

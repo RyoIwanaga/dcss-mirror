@@ -635,10 +635,11 @@ static int dgn_map_pathfind(lua_State *ls, int minargs,
     MAP(ls, 1, map);
     const int nargs = lua_gettop(ls);
     if (nargs < minargs)
-        return luaL_error
-        (ls,
-         make_stringf("Not enough points to test connectedness "
-                      "(need at least %d)", minargs / 2).c_str());
+    {
+        return luaL_error(ls,
+            make_stringf("Not enough points to test connectedness "
+                         "(need at least %d)", minargs / 2).c_str());
+    }
 
     map_def::map_feature_finder feat_finder(*map);
     map_def::map_bounds_check bounds_checker(*map);

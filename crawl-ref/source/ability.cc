@@ -655,12 +655,16 @@ const string make_cost_description(ability_type ability)
     const ability_def& abil = get_ability_def(ability);
     string ret;
     if (abil.mp_cost)
+    {
         ret += make_stringf(", %d %sMP", abil.mp_cost,
             abil.flags & ABFLAG_PERMANENT_MP ? "Permanent " : "");
+    }
 
     if (abil.hp_cost)
+    {
         ret += make_stringf(", %d %sHP", abil.hp_cost.cost(you.hp_max),
             abil.flags & ABFLAG_PERMANENT_HP ? "Permanent " : "");
+    }
 
     if (abil.zp_cost)
         ret += make_stringf(", %d ZP", (int)_zp_cost(abil));
@@ -3378,7 +3382,9 @@ vector<talent> your_talents(bool check_confused, bool include_unusable)
     // And finally, the ability to opt-out of your faith {dlb}:
     if (!you_worship(GOD_NO_GOD)
         && (include_unusable || !silenced(you.pos())))
+    {
         _add_talent(talents, ABIL_RENOUNCE_RELIGION, check_confused);
+    }
 
     if (env.level_state & LSTATE_BEOGH && can_convert_to_beogh())
         _add_talent(talents, ABIL_CONVERT_TO_BEOGH, check_confused);
@@ -3596,6 +3602,7 @@ void set_god_ability_slots()
 static int _find_ability_slot(const ability_def &abil)
 {
     for (int slot = 0; slot < 52; slot++)
+    {
         // Placeholder handling, part 2: The ability we have might
         // correspond to a placeholder, in which case the ability letter
         // table will contain that placeholder.  Convert the latter to
@@ -3603,6 +3610,7 @@ static int _find_ability_slot(const ability_def &abil)
         // we'll find the placeholder's index properly.
         if (_fixup_ability(you.ability_letter_table[slot]) == abil.ability)
             return slot;
+    }
 
     // No requested slot, find new one and make it preferred.
 
