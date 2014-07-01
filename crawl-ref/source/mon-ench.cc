@@ -32,6 +32,7 @@
 #include "mon-poly.h"
 #include "mon-place.h"
 #include "religion.h"
+#include "rot.h"
 #include "spl-clouds.h"
 #include "spl-damage.h"
 #include "spl-summoning.h"

@@ -352,6 +352,7 @@ static inline double pow(int x, double y) { return std::pow((double)x, y); }
 #ifdef DEBUG_DIAGNOSTICS
     #define DEBUG_TESTS
     #define DEBUG_MONSPEAK
+    #define DEBUG_BLOOD_POTIONS
 #endif
 
 // =========================================================================
