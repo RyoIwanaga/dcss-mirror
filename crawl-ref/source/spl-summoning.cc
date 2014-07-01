@@ -49,6 +49,7 @@
 #include "player-stats.h"
 #include "prompt.h"
 #include "religion.h"
+#include "rot.h"
 #include "shout.h"
 #include "spl-util.h"
 #include "spl-wpnench.h"
