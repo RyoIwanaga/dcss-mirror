@@ -3895,6 +3895,25 @@ void unmarshallItem(reader &th, item_def &item)
             item.plus2 = 0;
         }
     }
+
+    if (th.getMinorVersion() < TAG_MINOR_REGEN_AMULETS)
+    {
+        if (item.base_type == OBJ_JEWELLERY
+            && item.sub_type == RING_REGENERATION)
+        {
+            // XXX: this causes "buggy buggy rings" to fall off
+            // XXX: also causes contam from regen contam randarts
+            for (int i = EQ_LEFT_RING; i < NUM_EQUIP; i++)
+            {
+                const equipment_type eq_type = static_cast<equipment_type>(i);
+                if (you.slot_item(eq_type, true) == &item)
+                    remove_one_equip(eq_type, false, false);
+            }
+            item.sub_type = AMU_REGENERATION;
+            // TODO: handle changing randart item type
+            // TODO: handle vitring
+        }
+    }
 #endif
 
     if (is_unrandom_artefact(item))
