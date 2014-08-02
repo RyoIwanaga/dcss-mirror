@@ -472,115 +472,193 @@ static void _spell_retribution(monster* avatar, spell_type spell, god_type god)
     mons_cast(avatar, beam, spell, false, false);
 }
 
-static bool _makhleb_retribution()
+/**
+ * Choose a type of destruction with which to punish the player.
+ *
+ * @return A spell type to hurl at the player.
+ */
+static spell_type _makhleb_destruction_type()
 {
-    // demonic servant theme
+    const int severity = min(random_range(you.experience_level / 14,
+                                          you.experience_level / 9),
+                             2);
+    switch (severity)
+    {
+        case 0:
+        default:
+            // minor destruction
+            return random_choose(SPELL_THROW_FLAME,
+                                 SPELL_PAIN,
+                                 SPELL_STONE_ARROW,
+                                 SPELL_SHOCK,
+                                 SPELL_SPIT_ACID,
+                                 -1);
+        case 1:
+            // major destruction
+            return random_choose(SPELL_BOLT_OF_FIRE,
+                                 SPELL_FIREBALL,
+                                 SPELL_LIGHTNING_BOLT,
+                                 SPELL_STICKY_FLAME,
+                                 SPELL_IRON_SHOT,
+                                 SPELL_BOLT_OF_DRAINING,
+                                 SPELL_ORB_OF_ELECTRICITY,
+                                 -1);
+        case 2:
+            // legendary destruction (no IOOD because it doesn't really
+            // work here)
+            return random_choose(SPELL_FIREBALL,
+                                 SPELL_LEHUDIBS_CRYSTAL_SPEAR,
+                                 SPELL_ORB_OF_ELECTRICITY,
+                                 SPELL_FLASH_FREEZE,
+                                 SPELL_GHOSTLY_FIREBALL,
+                                 -1);
+    }
+}
+
+/**
+ * Create a fake 'avatar' monster representing a god, with which to hurl
+ * destructive magic at foolish players.
+ *
+ * @param god           The god doing the wrath-hurling.
+ * @param wrath_adj     The name for their wrath. ("wrath", "fury"...)
+ * @return              An avatar monster, or NULL if none could be set up.
+ */
+static monster* get_avatar(god_type god, const char* wrath_adj)
+{
+    monster* avatar = shadow_monster(false);
+    if (!avatar)
+        return NULL;
+
+    avatar->mname = make_stringf("the %s of %s", wrath_adj,
+                                 god_name(god).c_str());
+    avatar->flags |= MF_NAME_REPLACE;
+    avatar->attitude = ATT_HOSTILE;
+    avatar->set_hit_dice(you.experience_level);
+
+    return avatar;
+}
+
+/**
+ * Rain down Makhleb's destruction upon the player!
+ *
+ * @return Whether to take further divine wrath actions afterward.
+ */
+static bool _makhleb_call_down_destruction()
+{
     const god_type god = GOD_MAKHLEB;
 
-    if (coinflip())
+    monster* avatar = get_avatar(god, "fury");
+    // can't be const because mons_cast() doesn't accept const monster*
+
+    if (avatar == NULL)
     {
-        // Half the time, fling destruction at the player instead.
-        monster* avatar = shadow_monster(false);
-        if (!avatar)
-        {
-            simple_god_message("has no time to deal with you just now.", god);
-            return false;
-        }
-        avatar->mname = "the fury of Makhleb";
-        avatar->flags |= MF_NAME_REPLACE;
-        avatar->attitude = ATT_HOSTILE;
-        avatar->set_hit_dice(you.experience_level);
-
-        spell_type spell = SPELL_NO_SPELL;
-        const int severity = min(random_range(you.experience_level / 14,
-                                              you.experience_level / 9),
-                                 2);
-        switch (severity)
-        {
-            case 0:
-            default:
-                // minor destruction
-                spell = random_choose(SPELL_THROW_FLAME,
-                                      SPELL_PAIN,
-                                      SPELL_STONE_ARROW,
-                                      SPELL_SHOCK,
-                                      SPELL_SPIT_ACID,
-                                      -1);
-                break;
-            case 1:
-                // major destruction
-                spell = random_choose(SPELL_BOLT_OF_FIRE,
-                                      SPELL_FIREBALL,
-                                      SPELL_LIGHTNING_BOLT,
-                                      SPELL_STICKY_FLAME,
-                                      SPELL_IRON_SHOT,
-                                      SPELL_BOLT_OF_DRAINING,
-                                      SPELL_ORB_OF_ELECTRICITY,
-                                      -1);
-                break;
-            case 2:
-                // legendary destruction (no IOOD because it doesn't really
-                // work here)
-                spell = random_choose(SPELL_FIREBALL,
-                                      SPELL_LEHUDIBS_CRYSTAL_SPEAR,
-                                      SPELL_ORB_OF_ELECTRICITY,
-                                      SPELL_FLASH_FREEZE,
-                                      SPELL_GHOSTLY_FIREBALL,
-                                      -1);
-
-                break;
-        }
-        _spell_retribution(avatar, spell, god);
-        shadow_monster_reset(avatar);
-        return true;
+        simple_god_message("has no time to deal with you just now.", god);
+        return false; // not a very dazzling divine experience...
     }
 
+    _spell_retribution(avatar, _makhleb_destruction_type(), god);
+    shadow_monster_reset(avatar);
+    return true;
+}
+
+/**
+ * Figure out how many greater servants (2s) an instance of Makhleb's wrath
+ * should summon.
+ *
+ * @return The number of greater servants to be summoned by Makhleb's wrath.
+ */
+static int _makhleb_num_greater_servants()
+{
     const int severity = 1 + you.experience_level / 2
                            + random2(you.experience_level / 2);
-    int greater = 0;
+
     if (severity > 13)
-        greater = 2 + random2(you.experience_level / 5 - 2); // up to 6 at XL27
+        return 2 + random2(you.experience_level / 5 - 2); // up to 6 at XL27
     else if (severity > 7 && !one_chance_in(5))
-        greater = 1;
+        return 1;
+    return 0;
+}
+
+/**
+ * Attempt to summon one of Makhleb's diabolical servants to punish the player.
+ *
+ * @param servant   The type of servant to be summoned.
+ * @return          Whether the summoning was successful.
+ */
+static bool _makhleb_summon_servant(monster_type servant)
+{
+
+    mgen_data temp = mgen_data::hostile_at(servant, "the fury of Makhleb",
+                                           true, 0, 0, you.pos(), 0,
+                                           GOD_MAKHLEB);
+
+    temp.extra_flags |= (MF_NO_REWARD | MF_HARD_RESET);
+
+    return create_monster(temp, false);
+}
+
+/**
+ * Unleash Makhleb's fiendish minions on the player!
+ *
+ * @return Whether to take further divine wrath actions afterward. (true.)
+ */
+static bool _makhleb_summon_servants()
+{
+    const int greater_servants = _makhleb_num_greater_servants();
 
     // up to 6 at XL25+
-    int how_many =
-        max(greater,
-            1 + (random2(you.experience_level)
-                 + random2(you.experience_level)) / 10);
-    int count = 0;
+    const int total_servants = max(greater_servants,
+                               1 + (random2(you.experience_level)
+                                 + random2(you.experience_level)) / 10);
+    const int lesser_servants = total_servants - greater_servants;
 
-    for (; how_many > 0; --how_many)
+    int summoned = 0;
+
+    for (int i = 0; i < greater_servants; i++)
     {
-        monster_type servant = MONS_NO_MONSTER;
-        if (greater)
-        {
-            greater--;
-            servant = random_choose(MONS_EXECUTIONER,    MONS_GREEN_DEATH,
-                                    MONS_BLIZZARD_DEMON, MONS_BALRUG,
-                                    MONS_CACODEMON,      -1);
-        }
-        else
-        {
-            servant = random_choose(MONS_HELLWING,     MONS_NEQOXEC,
-                                    MONS_ORANGE_DEMON, MONS_SMOKE_DEMON,
-                                    MONS_YNOXINUL,     -1);
-        }
-        mgen_data temp =
-            mgen_data::hostile_at(servant, "the fury of Makhleb",
-                                  true, 0, 0, you.pos(), 0, god);
-
-        temp.extra_flags |= (MF_NO_REWARD | MF_HARD_RESET);
-
-        if (create_monster(temp, false))
-            count++;
+        const monster_type servant = random_choose(MONS_EXECUTIONER,
+                                                   MONS_GREEN_DEATH,
+                                                   MONS_BLIZZARD_DEMON,
+                                                   MONS_BALRUG,
+                                                   MONS_CACODEMON,
+                                                   -1);
+        if (_makhleb_summon_servant(servant))
+            summoned++;
     }
 
-    simple_god_message(count > 1 ? " sends minions to punish you." :
-                       count > 0 ? " sends a minion to punish you."
-                                 : "'s minions fail to arrive.", god);
+    for (int i = 0; i < lesser_servants; i++)
+    {
+        const monster_type servant = random_choose(MONS_HELLWING,
+                                                   MONS_NEQOXEC,
+                                                   MONS_ORANGE_DEMON,
+                                                   MONS_SMOKE_DEMON,
+                                                   MONS_YNOXINUL,
+                                                   -1);
+        if (_makhleb_summon_servant(servant))
+            summoned++;
+    }
+
+    simple_god_message(summoned > 1 ? " sends minions to punish you." :
+                       summoned > 0 ? " sends a minion to punish you."
+                       : "'s minions fail to arrive.", GOD_MAKHLEB);
 
     return true;
+
+}
+
+/**
+ * Call down the wrath of Makhleb upon the player!
+ *
+ * Demonic servant theme.
+ *
+ * @return Whether to take further divine wrath actions afterward.
+ */
+static bool _makhleb_retribution()
+{
+    if (coinflip())
+        return _makhleb_call_down_destruction();
+    else
+        return _makhleb_summon_servants();
 }
 
 static bool _kikubaaqudgha_retribution()
