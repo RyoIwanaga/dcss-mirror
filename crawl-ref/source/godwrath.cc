@@ -1144,23 +1144,15 @@ static bool _lugonu_retribution()
     return false;
 }
 
-static bool _vehumet_retribution()
+
+
+/**
+ * Choose a type of destruction with which to punish the player.
+ *
+ * @return A spell type to hurl at the player.
+ */
+static spell_type _vehumet_wrath_type()
 {
-    // conjuration theme
-    const god_type god = GOD_VEHUMET;
-
-    monster* avatar = shadow_monster(false);
-    if (!avatar)
-    {
-        simple_god_message("has no time to deal with you just now.", god);
-        return false;
-    }
-    avatar->mname = "the wrath of Vehumet";
-    avatar->flags |= MF_NAME_REPLACE;
-    avatar->attitude = ATT_HOSTILE;
-    avatar->set_hit_dice(you.experience_level);
-
-    spell_type spell = SPELL_NO_SPELL;
     const int severity = min(random_range(1 + you.experience_level / 5,
                                           1 + you.experience_level / 3),
                              9);
@@ -1168,67 +1160,84 @@ static bool _vehumet_retribution()
     switch (severity)
     {
         case 1:
-            spell = random_choose(SPELL_MAGIC_DART,
-                                  SPELL_STING,
-                                  SPELL_SHOCK,
-                                  SPELL_FLAME_TONGUE,
-                                  -1);
-            break;
+            return random_choose(SPELL_MAGIC_DART,
+                                 SPELL_STING,
+                                 SPELL_SHOCK,
+                                 SPELL_FLAME_TONGUE,
+                                 -1);
         case 2:
-            spell = random_choose(SPELL_THROW_FLAME,
-                                  SPELL_THROW_FROST,
-                                  -1);
-            break;
+            return random_choose(SPELL_THROW_FLAME,
+                                 SPELL_THROW_FROST,
+                                 -1);
         case 3:
-            spell = random_choose(SPELL_MEPHITIC_CLOUD,
-                                  SPELL_STONE_ARROW,
-                                  -1);
-            break;
+            return random_choose(SPELL_MEPHITIC_CLOUD,
+                                 SPELL_STONE_ARROW,
+                                 -1);
         case 4:
-            spell = random_choose(SPELL_ISKENDERUNS_MYSTIC_BLAST,
-                                  SPELL_STICKY_FLAME,
-                                  SPELL_THROW_ICICLE,
-                                  SPELL_ENERGY_BOLT,
-                                  -1);
-            break;
+            return random_choose(SPELL_ISKENDERUNS_MYSTIC_BLAST,
+                                 SPELL_STICKY_FLAME,
+                                 SPELL_THROW_ICICLE,
+                                 SPELL_ENERGY_BOLT,
+                                 -1);
         case 5:
-            spell = random_choose(SPELL_FIREBALL,
-                                  SPELL_LIGHTNING_BOLT,
-                                  SPELL_BOLT_OF_MAGMA,
-                                  SPELL_VENOM_BOLT,
-                                  SPELL_BOLT_OF_DRAINING,
-                                  SPELL_QUICKSILVER_BOLT,
-                                  SPELL_METAL_SPLINTERS,
-                                  -1);
-            break;
+            return random_choose(SPELL_FIREBALL,
+                                 SPELL_LIGHTNING_BOLT,
+                                 SPELL_BOLT_OF_MAGMA,
+                                 SPELL_VENOM_BOLT,
+                                 SPELL_BOLT_OF_DRAINING,
+                                 SPELL_QUICKSILVER_BOLT,
+                                 SPELL_METAL_SPLINTERS,
+                                 -1);
         case 6:
-            spell = random_choose(SPELL_BOLT_OF_FIRE,
-                                  SPELL_BOLT_OF_COLD,
-                                  SPELL_FREEZING_CLOUD,
-                                  SPELL_POISONOUS_CLOUD,
-                                  SPELL_POISON_ARROW,
-                                  SPELL_IRON_SHOT,
-                                  SPELL_CONJURE_BALL_LIGHTNING,
-                                  -1);
-            break;
+            return random_choose(SPELL_BOLT_OF_FIRE,
+                                 SPELL_BOLT_OF_COLD,
+                                 SPELL_CORROSIVE_BOLT,
+                                 SPELL_FREEZING_CLOUD,
+                                 SPELL_POISONOUS_CLOUD,
+                                 SPELL_POISON_ARROW,
+                                 SPELL_IRON_SHOT,
+                                 SPELL_CONJURE_BALL_LIGHTNING,
+                                 -1);
         case 7:
-            spell = random_choose(SPELL_ORB_OF_ELECTRICITY,
-                                  SPELL_FLASH_FREEZE,
-                                  -1);
-            break;
+            return random_choose(SPELL_ORB_OF_ELECTRICITY,
+                                 SPELL_FLASH_FREEZE,
+                                 -1);
         case 8:
-            spell = random_choose(SPELL_LEHUDIBS_CRYSTAL_SPEAR,
-                                  -1);
-            break;
+            return random_choose(SPELL_LEHUDIBS_CRYSTAL_SPEAR,
+                                 -1);
         case 9:
-            spell = random_choose(SPELL_FIRE_STORM,
-                                  SPELL_HELLFIRE, // let it end...
-                                  -1);
-            break;
+            return random_choose(SPELL_FIRE_STORM,
+                                 SPELL_HELLFIRE, // let it end...
+                                 -1);
         default:
-            simple_god_message("has no time to deal with you just now.", god);
-            shadow_monster_reset(avatar);
-            return false;
+            return SPELL_NO_SPELL;
+    }
+}
+
+/**
+ * Call down the wrath of Vehumpet upon the player!
+ *
+ * Conjuration theme.
+ *
+ * @return Whether to take further divine wrath actions afterward.
+ */
+static bool _vehumet_retribution()
+{
+    const god_type god = GOD_VEHUMET;
+
+    monster* avatar = get_avatar(god, "wrath");
+    if (!avatar)
+    {
+        simple_god_message("has no time to deal with you just now.", god);
+        return false;
+    }
+
+    const spell_type spell = _vehumet_wrath_type();
+    if (spell == SPELL_NO_SPELL)
+    {
+        simple_god_message("has no time to deal with you just now.", god);
+        shadow_monster_reset(avatar);
+        return false;
     }
 
     _spell_retribution(avatar, spell, god);
