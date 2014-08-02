@@ -154,50 +154,72 @@ static bool _dithmenos_random_shadow(const int count, const int tier)
     return create_monster(temp, false);
 }
 
+/**
+ * Summon divine warriors of the Shining One to punish the player.
+ */
+static void _tso_summon_warriors()
+{
+    bool success = false;
+    int how_many = 1 + random2(you.experience_level / 5) + random2(3);
+
+    for (; how_many > 0; --how_many)
+    {
+        if (summon_holy_warrior(100, true))
+            success = true;
+    }
+
+    simple_god_message(success ? " sends the divine host to punish "
+                       "you for your evil ways!"
+                       : "'s divine host fails to appear.", GOD_SHINING_ONE);
+
+}
+
+/**
+ * The Shining One shouts angrily to alert the player's foes!
+ */
+static void _tso_shouts()
+{
+    simple_god_message(" booms out: "
+                       "\"Take the path of righteousness! REPENT!\"",
+                       GOD_SHINING_ONE);
+    noisy(25, you.pos()); // same as scroll of noise
+}
+
+/**
+ * The Shining One silences the player!!
+ */
+static void _tso_squelches()
+{
+    god_speaks(GOD_SHINING_ONE,
+               "You feel the Shining One's silent rage upon you!");
+    cast_silence(25);
+}
+
+/**
+ * Call down the wrath of the Shining One upon the player!
+ *
+ * Holy warriors/cleansing theme.
+ *
+ * @return Whether to take further divine wrath actions afterward. (false.)
+ */
 static bool _tso_retribution()
 {
-    // holy warriors/cleansing theme
-    const god_type god = GOD_SHINING_ONE;
-
-    int punishment = random2(7);
-
-    switch (punishment)
+    switch (random2(7))
     {
     case 0:
     case 1:
-    case 2: // summon holy warriors (3/7)
-    {
-        bool success = false;
-        int how_many = 1 + random2(you.experience_level / 5) + random2(3);
-
-        for (; how_many > 0; --how_many)
-        {
-            if (summon_holy_warrior(100, true))
-                success = true;
-        }
-
-        simple_god_message(success ? " sends the divine host to punish "
-                                     "you for your evil ways!"
-                                   : "'s divine host fails to appear.", god);
-
+    case 2:
+        _tso_summon_warriors();
         break;
-    }
     case 3:
-    case 4: // cleansing flame (2/7)
+    case 4:
         _tso_blasts_cleansing_flame();
         break;
     case 5:
-    case 6: // either noisiness or silence (2/7)
-        if (coinflip())
-        {
-            simple_god_message(" booms out: \"Take the path of righteousness! REPENT!\"", god);
-            noisy(25, you.pos()); // same as scroll of noise
-        }
-        else
-        {
-            god_speaks(god, "You feel the Shining One's silent rage upon you!");
-            cast_silence(25);
-        }
+        _tso_shouts();
+        break;
+    case 6:
+        _tso_squelches();
         break;
     }
     return false;
