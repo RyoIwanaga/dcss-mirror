@@ -80,7 +80,7 @@ static const char *_god_wrath_adjectives[] =
     "touch",            // Lugonu
     "wrath",            // Beogh
     "vengeance",        // Jiyva
-    "enmity",           // Fedhas
+    "enmity",           // Fedhas Madhash
     "meddling",         // Cheibriados
     "doom",             // Ashenzari (unused)
     "darkness",         // Dithmenos
@@ -1431,13 +1431,130 @@ static bool _jiyva_retribution()
     return true;
 }
 
+/**
+ * Let Fedhas call down the enmity of nature upon the player!
+ */
+static void _fedhas_elemental_miscast()
+{
+    const god_type god = GOD_FEDHAS;
+    simple_god_message(" invokes the elements against you.", god);
+
+    const spschool_flag_type stype = random_choose(SPTYP_ICE, SPTYP_FIRE,
+                                                   SPTYP_EARTH, SPTYP_AIR,
+                                                   -1);
+    MiscastEffect(&you, -god, stype, 5 + you.experience_level,
+                  random2avg(88, 3), god_wrath_name(god));
+}
+
+/**
+ * Summon Fedhas's oklobs & mushrooms around the player.
+ *
+ * @return Whether to take further divine wrath actions afterward.
+ */
+static bool _fedhas_summon_plants()
+{
+    const god_type god = GOD_FEDHAS;
+    bool success = false;
+
+    // We are going to spawn some oklobs but first we need to find
+    // out a little about the situation.
+    vector<vector<coord_def> > radius_points;
+    collect_radius_points(radius_points, you.pos(), LOS_NO_TRANS);
+
+    int max_idx = 3;
+    unsigned max_points = radius_points[max_idx].size();
+
+    for (unsigned i = max_idx + 1; i < radius_points.size(); i++)
+    {
+        if (radius_points[i].size() > max_points)
+        {
+            max_points = radius_points[i].size();
+            max_idx = i;
+        }
+    }
+
+    mgen_data temp =
+        mgen_data::hostile_at(MONS_OKLOB_PLANT,
+                              god_wrath_name(god),
+                              false, 0, 0,
+                              coord_def(-1, -1),
+                              MG_FORCE_PLACE, god);
+
+    temp.extra_flags |= (MF_NO_REWARD | MF_HARD_RESET);
+
+    // If we have a lot of space to work with we can do something
+    // flashy.
+    if (radius_points[max_idx].size() > 24)
+    {
+        int seen_count;
+
+        temp.cls = MONS_PLANT;
+
+        place_ring(radius_points[0],
+                   you.pos(),
+                   temp,
+                   1, radius_points[0].size(),
+                   seen_count);
+
+        if (seen_count > 0)
+            success = true;
+
+        temp.cls = MONS_OKLOB_PLANT;
+
+        place_ring(radius_points[max_idx],
+                   you.pos(),
+                   temp,
+                   random_range(3, 8), 1,
+                   seen_count);
+
+        if (seen_count > 0)
+            success = true;
+    }
+    // Otherwise we do something with the nearest neighbors
+    // (assuming the player isn't already surrounded).
+    else if (!radius_points[0].empty())
+    {
+        unsigned target_count = random_range(2, 8);
+        if (target_count < radius_points[0].size())
+            prioritise_adjacent(you.pos(), radius_points[0]);
+        else
+            target_count = radius_points[0].size();
+
+        for (unsigned i = radius_points[0].size() - target_count;
+             i < radius_points[0].size(); ++i)
+        {
+            temp.pos = radius_points[0].at(i);
+            temp.cls = coinflip() ? MONS_WANDERING_MUSHROOM
+                                  : MONS_OKLOB_PLANT;
+
+            if (create_monster(temp, false))
+                success = true;
+        }
+    }
+
+    if (success)
+    {
+        god_speaks(god, "Plants grow around you in an ominous manner.");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Call down the wrath of Fedhas upon the player!
+ *
+ * Plants and elemental miscasts.
+ *
+ * @return Whether to take further divine wrath actions afterward.
+ */
 static bool _fedhas_retribution()
 {
     const god_type god = GOD_FEDHAS;
 
     // We have 3 forms of retribution, but players under penance will be
     // spared the 'you are now surrounded by oklob plants, please die' one.
-    const int retribution_options = you_worship(GOD_FEDHAS) ? 2 : 3;
+    const int retribution_options = you_worship(god) ? 2 : 3;
 
     switch (random2(retribution_options))
     {
@@ -1446,133 +1563,18 @@ static bool _fedhas_retribution()
         // fall through to the elemental miscast effects.
         if (fedhas_corpse_spores(BEH_HOSTILE))
         {
-            simple_god_message(" produces spores.", GOD_FEDHAS);
-            break;
+            simple_god_message(" produces spores.", god);
+            return true;
         }
 
     case 1:
-    {
-        // Elemental miscast effects.
-        simple_god_message(" invokes the elements against you.", GOD_FEDHAS);
-
-        spschool_flag_type stype = SPTYP_NONE;
-        switch (random2(4))
-        {
-        case 0:
-            stype= SPTYP_ICE;
-            break;
-        case 1:
-            stype = SPTYP_EARTH;
-            break;
-        case 2:
-            stype = SPTYP_FIRE;
-            break;
-        case 3:
-            stype = SPTYP_AIR;
-            break;
-        };
-        MiscastEffect(&you, -god, stype, 5 + you.experience_level,
-                      random2avg(88, 3), god_wrath_name(god));
-        break;
-    }
+    default:
+        _fedhas_elemental_miscast();
+            return true;
 
     case 2:
-    {
-        bool success = false;
-
-        // We are going to spawn some oklobs but first we need to find
-        // out a little about the situation.
-        vector<vector<coord_def> > radius_points;
-        collect_radius_points(radius_points, you.pos(), LOS_NO_TRANS);
-
-        unsigned free_thresh = 24;
-
-        int max_idx = 3;
-        unsigned max_points = radius_points[max_idx].size();
-
-        for (unsigned i=max_idx + 1; i<radius_points.size(); i++)
-        {
-            if (radius_points[i].size() > max_points)
-            {
-                max_points = radius_points[i].size();
-                max_idx = i;
-            }
-        }
-
-        mgen_data temp =
-            mgen_data::hostile_at(MONS_OKLOB_PLANT,
-                                  god_wrath_name(god),
-                                  false,
-                                  0,
-                                  0,
-                                  coord_def(-1, -1),
-                                  MG_FORCE_PLACE,
-                                  GOD_FEDHAS);
-
-       temp.extra_flags |= (MF_NO_REWARD | MF_HARD_RESET);
-
-        // If we have a lot of space to work with we can do something
-        // flashy.
-        if (radius_points[max_idx].size() > free_thresh)
-        {
-            int seen_count;
-
-            temp.cls = MONS_PLANT;
-
-            place_ring(radius_points[0],
-                       you.pos(),
-                       temp,
-                       1, radius_points[0].size(),
-                       seen_count);
-
-            if (seen_count > 0)
-                success = true;
-
-            temp.cls = MONS_OKLOB_PLANT;
-
-            place_ring(radius_points[max_idx],
-                       you.pos(),
-                       temp,
-                       random_range(3, 8), 1,
-                       seen_count);
-
-            if (seen_count > 0)
-                success = true;
-        }
-        // Otherwise we do something with the nearest neighbors
-        // (assuming the player isn't already surrounded).
-        else if (!radius_points[0].empty())
-        {
-            unsigned target_count = random_range(2, 8);
-            if (target_count < radius_points[0].size())
-                prioritise_adjacent(you.pos(), radius_points[0]);
-            else
-                target_count = radius_points[0].size();
-
-            unsigned i = radius_points[0].size() - target_count;
-
-            for (; i < radius_points[0].size(); ++i)
-            {
-                temp.pos = radius_points[0].at(i);
-                temp.cls = coinflip() ? MONS_WANDERING_MUSHROOM
-                                      : MONS_OKLOB_PLANT;
-
-                if (create_monster(temp, false))
-                    success = true;
-            }
-        }
-
-        if (success)
-        {
-            god_speaks(god, "Plants grow around you in an ominous manner.");
-            return false;
-        }
-
-        break;
+        return _fedhas_summon_plants();
     }
-    }
-
-    return true;
 }
 
 static bool _dithmenos_retribution()
