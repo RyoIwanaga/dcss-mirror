@@ -1639,109 +1639,138 @@ static bool _dithmenos_retribution()
     return true;
 }
 
-static bool _qazlal_retribution()
+/**
+ * Summon Qazlal's elemental minions to destroy the player!
+ */
+static void _qazlal_summon_elementals()
 {
-    // disaster/elemental theme
     const god_type god = GOD_QAZLAL;
 
+    mgen_data temp =
+        mgen_data::hostile_at(MONS_NO_MONSTER,
+                              god_wrath_name(god),
+                              true, 0, 0, you.pos(), 0, god);
+
+    temp.hd = you.experience_level;
+    temp.extra_flags |= (MF_NO_REWARD | MF_HARD_RESET);
+
+    const int how_many = 1 + (you.experience_level / 5);
+    bool success = false;
+
+    for (int i = 0; i < how_many; i++)
+    {
+        temp.cls = random_choose(MONS_FIRE_ELEMENTAL,
+                                 MONS_WATER_ELEMENTAL,
+                                 MONS_AIR_ELEMENTAL,
+                                 MONS_EARTH_ELEMENTAL,
+                                 -1);
+        if (create_monster(temp, false))
+            success = true;
+    }
+
+    if (success)
+        simple_god_message(" incites the elements against you!", god);
+    else
+        simple_god_message(" fails to incite the elements against you.", god);
+}
+
+/**
+ * Surround the player with dangerous terrain! (Currently just lava!)
+ */
+static void _qazlal_deform_terrain()
+{
+    // TODO: think of terrain-ish effects for the other elements
+
+    const god_type god = GOD_QAZLAL;
+
+    vector<coord_weight> candidates;
+    for (radius_iterator ri(you.pos(), LOS_NO_TRANS); ri; ++ri)
+    {
+        if (grd(*ri) != DNGN_FLOOR || actor_at(*ri) || igrd(*ri) != NON_ITEM)
+            continue;
+
+        const int weight = LOS_RADIUS*LOS_RADIUS - distance2(you.pos(), *ri);
+        candidates.push_back(coord_weight(*ri, weight));
+    }
+
+    const int how_many = min((int)candidates.size(),
+                             3 + (you.experience_level / 2));
+    int deforms = 0;
+    while (deforms < how_many)
+    {
+        const coord_def* pos = random_choose_weighted(candidates);
+        if (!pos)
+            break;
+
+        deforms++;
+        temp_change_terrain(*pos, DNGN_LAVA,
+                            random2(you.experience_level * BASELINE_DELAY),
+                            TERRAIN_CHANGE_FLOOD);
+
+        for (vector<coord_weight>::iterator it = candidates.begin();
+             it != candidates.end(); ++it)
+        {
+            if (it->first == *pos)
+            {
+                candidates.erase(it);
+                break;
+            }
+        }
+    }
+
+    if (deforms)
+    {
+        mprf(MSGCH_GOD, god,
+             "The ground around you shudders, and lava spills forth!");
+    }
+    else
+    {
+        mprf(MSGCH_GOD, god,
+             "The ground around you shudders for a moment.");
+    }
+}
+
+/**
+ * Give the player temporary elemental-vulnerability mutations.
+ */
+static void _qazlal_elemental_vulnerability()
+{
+    const god_type god = GOD_QAZLAL;
+
+    if (mutate(RANDOM_QAZLAL_MUTATION, god_wrath_name(god), false,
+               false, true, false, false, false, true))
+    {
+        simple_god_message(" strips away your elemental protection.",
+                           god);
+    }
+    else
+    {
+        simple_god_message(" fails to strip away your elemental protection.",
+                           god);
+    }
+}
+
+/**
+ * Call down the wrath of Qazlal upon the player!
+ *
+ * Disaster/elemental theme.
+ *
+ * @return Whether to take further divine wrath actions afterward.
+ */
+static bool _qazlal_retribution()
+{
     switch (random2(3))
     {
     case 0:
-    {
-        mgen_data temp =
-            mgen_data::hostile_at(MONS_NO_MONSTER,
-                                  god_wrath_name(god),
-                                  true, 0, 0, you.pos(), 0, god);
-
-        temp.hd = you.experience_level;
-        temp.extra_flags |= (MF_NO_REWARD | MF_HARD_RESET);
-
-        int how_many = 1 + (you.experience_level / 5);
-        bool success = false;
-
-        for (; how_many > 0; how_many--)
-        {
-            temp.cls = random_choose(MONS_FIRE_ELEMENTAL,
-                                     MONS_WATER_ELEMENTAL,
-                                     MONS_AIR_ELEMENTAL,
-                                     MONS_EARTH_ELEMENTAL,
-                                     -1);
-            if (create_monster(temp, false))
-                success = true;
-        }
-        if (success)
-            simple_god_message(" incites the elements against you!", god);
-        else
-        {
-            simple_god_message(" fails to incite the elements against you.",
-                               god);
-        }
+        _qazlal_summon_elementals();
         break;
-    }
     case 1:
     {
-        // TODO: think of terrain-ish effects for the other elements
-        bool success = false;
-        vector<coord_weight> candidates;
-        for (radius_iterator ri(you.pos(), LOS_NO_TRANS); ri; ++ri)
-        {
-            if (grd(*ri) != DNGN_FLOOR
-                || actor_at(*ri)
-                || igrd(*ri) != NON_ITEM)
-            {
-                continue;
-            }
-
-            const int weight = LOS_RADIUS*LOS_RADIUS
-                               - distance2(you.pos(), *ri);
-            candidates.push_back(coord_weight(*ri, weight));
-        }
-        int how_many = min((int)candidates.size(),
-                           3 + (you.experience_level / 2));
-        while (how_many > 0)
-        {
-            coord_def* pos = random_choose_weighted(candidates);
-            if (!pos)
-                break;
-            success = true;
-            how_many--;
-            temp_change_terrain(*pos, DNGN_LAVA,
-                                random2(you.experience_level * BASELINE_DELAY),
-                                TERRAIN_CHANGE_FLOOD);
-            for (vector<coord_weight>::iterator it = candidates.begin();
-                 it != candidates.end(); ++it)
-            {
-                if (it->first == *pos)
-                {
-                    candidates.erase(it);
-                    break;
-                }
-            }
-        }
-        if (success)
-        {
-            mprf(MSGCH_GOD, god,
-                 "The ground around you shudders, and lava spills forth!");
-        }
-        else
-        {
-            mprf(MSGCH_GOD, god,
-                 "The ground around you shudders for a moment.");
-        }
+        _qazlal_deform_terrain();
         break;
     }
     case 2:
-        if (mutate(RANDOM_QAZLAL_MUTATION, "the adversity of Qazlal", false,
-                   false, true, false, false, false, true))
-        {
-            simple_god_message(" strips away your elemental protection.",
-                               god);
-        }
-        else
-        {
-            simple_god_message(" fails to strip away your elemental protection.",
-                               god);
-        }
+        _qazlal_elemental_vulnerability();
         break;
     }
 
