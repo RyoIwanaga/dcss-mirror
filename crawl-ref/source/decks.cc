@@ -2110,9 +2110,9 @@ static string _god_wrath_stat_check(string cause_orig)
     {
         god_type which_god = crawl_state.which_god_acting();
         if (crawl_state.is_god_retribution())
-            cause = "the wrath of " + god_name(which_god);
+            cause = god_wrath_name(which_god);
         else if (which_god == GOD_XOM)
-            cause = "the capriciousness of Xom";
+            cause = "the capriciousness of " + god_name(which_god);
         else
             cause = "the 'helpfulness' of " + god_name(which_god);
     }
