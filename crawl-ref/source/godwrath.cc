@@ -1304,117 +1304,129 @@ static bool _nemelex_retribution()
     return true;
 }
 
+/**
+ * Let Jiyva throw a few malmutations the player's way.
+ */
+static void _jiyva_mutate_player()
+{
+    god_speaks(GOD_JIYVA, "You feel Jiyva alter your body.");
+
+    const int mutations = 1 + random2(3);
+    for (int i = 0; i < mutations; ++i)
+        mutate(RANDOM_BAD_MUTATION, "Jiyva's wrath", true, false, true);
+}
+
+/**
+ * Make Jiyva slmify a nearby enemy.
+ */
+static void _jiyva_slimify()
+{
+    monster* mon = NULL;
+
+    const int max_tries = 10;
+    bool success = false;
+    for (int i = 0; i < max_tries; i++)
+    {
+        mon = choose_random_nearby_monster(0);
+
+        if (mon && mon_can_be_slimified(mon) && mon->attitude == ATT_HOSTILE)
+        {
+            success = true;
+            break;
+        }
+    }
+
+    if (success)
+        return;
+
+    simple_god_message(make_stringf("'s putrescence saturates %s!",
+                                    mon->name(DESC_THE).c_str()).c_str(),
+                       GOD_JIYVA);
+    slimify_monster(mon, true);
+}
+
+/**
+ * Transmutation-miscast-themed wrath; make Jiyva contaminate tha player,
+ * and possibly polymorph them into a bad (?) form.
+ */
+static void _jiyva_tmut()
+{
+    const god_type god = GOD_JIYVA;
+    god_speaks(god, "Mutagenic energy floods into your body!");
+    contaminate_player(random2(you.penance[god] * 500));
+
+    if (coinflip())
+        return;
+
+    // XXX: someone should probably rethink this list...
+    const transformation_type form = random_choose(TRAN_BAT, TRAN_STATUE,
+                                                   TRAN_SPIDER, -1);
+
+    if (transform(random2(you.penance[god]) * 2, form, true))
+        you.transform_uncancellable = true;
+}
+
+static void _jiyva_summon_slimes()
+{
+    const god_type god = GOD_JIYVA;
+
+    const monster_type slimes[] =
+    {
+        MONS_GIANT_EYEBALL,
+        MONS_EYE_OF_DRAINING,
+        MONS_EYE_OF_DEVASTATION,
+        MONS_GREAT_ORB_OF_EYES,
+        MONS_SHINING_EYE,
+        MONS_GIANT_ORANGE_BRAIN,
+        MONS_JELLY,
+        MONS_ACID_BLOB,
+        MONS_AZURE_JELLY,
+        MONS_DEATH_OOZE,
+        MONS_SLIME_CREATURE,
+    };
+
+    const int how_many = 1 + (you.experience_level / 10) + random2(3);
+    bool success = false;
+
+    for (int i = 0; i < how_many; i++)
+    {
+        const monster_type slime = RANDOM_ELEMENT(slimes);
+
+        mgen_data temp =
+            mgen_data::hostile_at(static_cast<monster_type>(slime),
+                                  god_wrath_name(god),
+                                  true, 0, 0, you.pos(), 0, god);
+
+        temp.extra_flags |= (MF_NO_REWARD | MF_HARD_RESET);
+
+        if (create_monster(temp, false))
+            success = true;
+    }
+
+    god_speaks(god, success ? "Some slimes ooze up out of the ground!"
+                            : "The ground quivers slightly.");
+}
+
+/**
+ * Call down the wrath of Jiyva upon the player!
+ *
+ * Mutations and slime theme.
+ *
+ * @return Whether to take further divine wrath actions afterward. (true.)
+ */
 static bool _jiyva_retribution()
 {
     const god_type god = GOD_JIYVA;
 
     if (you.can_safely_mutate() && one_chance_in(7))
-    {
-        const int mutat = 1 + random2(3);
-
-        god_speaks(god, "You feel Jiyva alter your body.");
-
-        for (int i = 0; i < mutat; ++i)
-            mutate(RANDOM_BAD_MUTATION, "Jiyva's wrath", true, false, true);
-    }
+        _jiyva_mutate_player();
     // Don't create hostile slimes while under penance.
-    else if (!you_worship(GOD_JIYVA)
-             && there_are_monsters_nearby()
-             && coinflip())
-    {
-        int tries = 0;
-        bool found_one = false;
-        monster* mon;
-
-        while (tries < 10)
-        {
-            mon = choose_random_nearby_monster(0);
-
-            if (!mon || !mon_can_be_slimified(mon)
-                || mon->attitude != ATT_HOSTILE)
-            {
-                tries++;
-                continue;
-            }
-            else
-            {
-                found_one = true;
-                break;
-            }
-        }
-
-        if (found_one)
-        {
-            simple_god_message(
-                make_stringf("'s putrescence saturates %s!",
-                             mon->name(DESC_THE).c_str()).c_str(), god);
-            slimify_monster(mon, true);
-        }
-    }
-    else if (!one_chance_in(3) || you_worship(GOD_JIYVA))
-    {
-        god_speaks(god, "Mutagenic energy floods into your body!");
-        contaminate_player(random2(you.penance[GOD_JIYVA] * 500));
-
-        if (coinflip())
-        {
-            transformation_type form = TRAN_NONE;
-
-            switch (random2(3))
-            {
-                case 0:
-                    form = TRAN_BAT;
-                    break;
-                case 1:
-                    form = TRAN_STATUE;
-                    break;
-                case 2:
-                    form = TRAN_SPIDER;
-                    break;
-            }
-
-            if (transform(random2(you.penance[GOD_JIYVA]) * 2, form, true))
-                you.transform_uncancellable = true;
-        }
-    }
+    else if (!you_worship(god) && there_are_monsters_nearby() && coinflip())
+        _jiyva_slimify();
+    else if (!one_chance_in(3) || you_worship(god))
+        _jiyva_tmut();
     else
-    {
-        const monster_type slimes[] =
-        {
-            MONS_GIANT_EYEBALL,
-            MONS_EYE_OF_DRAINING,
-            MONS_EYE_OF_DEVASTATION,
-            MONS_GREAT_ORB_OF_EYES,
-            MONS_SHINING_EYE,
-            MONS_GIANT_ORANGE_BRAIN,
-            MONS_JELLY,
-            MONS_ACID_BLOB,
-            MONS_AZURE_JELLY,
-            MONS_DEATH_OOZE,
-            MONS_SLIME_CREATURE,
-        };
-
-        int how_many = 1 + (you.experience_level / 10) + random2(3);
-        bool success = false;
-
-        for (; how_many > 0; --how_many)
-        {
-            const monster_type slime = RANDOM_ELEMENT(slimes);
-
-            mgen_data temp =
-                mgen_data::hostile_at(static_cast<monster_type>(slime),
-                                      god_wrath_name(god),
-                                      true, 0, 0, you.pos(), 0, god);
-
-            temp.extra_flags |= (MF_NO_REWARD | MF_HARD_RESET);
-
-            if (create_monster(temp, false))
-                success = true;
-        }
-
-        god_speaks(god, success ? "Some slimes ooze up out of the ground!"
-                                : "The ground quivers slightly.");
-    }
+        _jiyva_summon_slimes();
 
     return true;
 }
