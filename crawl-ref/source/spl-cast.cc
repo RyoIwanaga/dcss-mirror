@@ -586,7 +586,7 @@ static bool _can_cast()
         return false;
     }
 
-    if (!you.is_undead && !you_foodless()
+    if (!you.undead_state() && !you_foodless()
         && you.hunger_state == HS_STARVING)
     {
         canned_msg(MSG_NO_ENERGY);
@@ -746,7 +746,7 @@ bool cast_a_spell(bool check_range, spell_type spell)
         return false;
     }
 
-    if (!you.is_undead && !you_foodless()
+    if (you.undead_state() == US_ALIVE && !you_foodless()
         && you.hunger <= spell_hunger(spell))
     {
         canned_msg(MSG_NO_ENERGY);
@@ -815,7 +815,7 @@ bool cast_a_spell(bool check_range, spell_type spell)
 #endif
         flush_mp();
 
-    if (!staff_energy && you.is_undead != US_UNDEAD)
+    if (!staff_energy && you.undead_state() != US_UNDEAD)
     {
         const int spellh = spell_hunger(spell);
         if (calc_hunger(spellh) > 0)
