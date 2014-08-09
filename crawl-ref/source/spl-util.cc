@@ -965,6 +965,7 @@ int spell_range(spell_type spell, int pow, bool player_spell)
         && spell != SPELL_STICKY_FLAME
         && spell != SPELL_FREEZE
         && spell != SPELL_DISCHARGE
+        && spell != SPELL_IRRADIATE
         && spell != SPELL_GLACIATE)
     {
         maxrange++;
@@ -1281,6 +1282,13 @@ string spell_uselessness_reason(spell_type spell, bool temp, bool prevent,
         }
         break;
 
+    case SPELL_IRRADIATE:
+        if (temp && you.duration[DUR_STONESKIN]
+            || you.holiness(temp) == MH_NONLIVING)
+        {
+            return "Your stone skin can't be turned into magical radiation!";
+        }
+        // fallthrough to forms
     case SPELL_STONESKIN:
     case SPELL_BEASTLY_APPENDAGE:
     case SPELL_BLADE_HANDS:
