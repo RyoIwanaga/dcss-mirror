@@ -117,28 +117,13 @@ static bool _do_build_level()
             default:
                 break;
             }
-            if (crawl_state.obj_stat_gen)
-            {
-                coord_def pos(x, y);
-                // Turn any mimics into actual monsters so they'll be recorded.
-                discover_mimic(pos, false);
-                monster *mons = monster_at(pos);
-                if (mons)
-                    objstat_record_monster(mons);
-
-            }
         }
 
     // Record items for objstat
     if (crawl_state.obj_stat_gen)
-    {
         for (int i = 0; i < MAX_ITEMS; ++i)
-        {
-            if (!mitm[i].defined())
-                continue;
-            objstat_record_item(mitm[i]);
-        }
-    }
+            if (mitm[i].defined())
+                objstat_record_item(mitm[i]);
 
     {
         unwind_bool wiz(you.wizard, true);
