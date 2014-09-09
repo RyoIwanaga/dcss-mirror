@@ -1062,27 +1062,31 @@ int contamination_ratio(corpse_effect_type chunk_effect)
     return ratio;
 }
 
-static mon_intel_type _chunk_intelligence(const item_def &chunk)
+/**
+ * Note the divine conducts that players violated by eating a chunk of meat.
+ *
+ * @param food  The stack of chunks in question.
+ */
+static void _do_chunk_conducts(item_def &chunks)
 {
-    // An optimising compiler can assume an enum value is in range, so
-    // check the range on the uncast value.
-    const bool bad = chunk.orig_monnum < 0 || chunk.orig_monnum >= NUM_MONSTERS;
-    const monster_type orig_mt = static_cast<monster_type>(chunk.orig_monnum);
-    const monster_type type = bad || invalid_monster_type(orig_mt)
-                            ? chunk.mon_type
-                            : orig_mt;
-    return mons_class_intel(type);
+    const CrawlVector conducts = chunks.props[CHUNK_CONDUCT_KEY].get_vector();
+    for (int i = 0; i < conducts.size(); i++)
+    {
+        // optimizing compilers can assume that enums are valid, so check
+        // before casting.
+        const int conduct = conducts[i].get_int();
+        ASSERT(conduct >= 0 && conduct <= NUM_CONDUCTS);
+
+        did_god_conduct(static_cast<conduct_type>(conduct),
+                        conduct == DID_CANNIBALISM ? 10 : 2);
+    }
 }
 
 // Never called directly - chunk_effect values must pass
 // through food:determine_chunk_effect() first. {dlb}:
 static void _eat_chunk(item_def& food)
 {
-    const bool cannibal  = is_player_same_genus(food.mon_type);
-    const int intel      = _chunk_intelligence(food) - I_ANIMAL;
     const bool rotten    = food_is_rotten(food);
-    const bool orc       = (mons_genus(food.mon_type) == MONS_ORC);
-    const bool holy      = (mons_class_holiness(food.mon_type) == MH_HOLY);
     corpse_effect_type chunk_effect = mons_corpse_effect(food.mon_type);
     chunk_effect = determine_chunk_effect(chunk_effect, rotten);
 
@@ -1146,15 +1150,7 @@ static void _eat_chunk(item_def& food)
         break;
     }
 
-    if (cannibal)
-        did_god_conduct(DID_CANNIBALISM, 10);
-    else if (intel > 0)
-        did_god_conduct(DID_EAT_SOULED_BEING, intel);
-
-    if (orc)
-        did_god_conduct(DID_DESECRATE_ORCISH_REMAINS, 2);
-    if (holy)
-        did_god_conduct(DID_DESECRATE_HOLY_REMAINS, 2);
+    _do_chunk_conducts(food);
 
     if (do_eat)
     {
@@ -1496,35 +1492,142 @@ bool is_preferred_food(const item_def &food)
     return false;
 }
 
+/**
+ * Does the player's god hate the given (food-related) conduct type?
+ *
+ * XXX: move this into religion.cc? generalize?
+ *
+ * @param conduct   The conduct type in question.
+ * @return          Whether the player's god hates it.
+ */
+static bool _god_hates_conduct(conduct_type conduct)
+{
+    switch (conduct)
+    {
+        case DID_CANNIBALISM:
+            return god_hates_cannibalism(you.religion);
+        case DID_EAT_SOULED_BEING:
+            return you_worship(GOD_ZIN);
+        case DID_DESECRATE_ORCISH_REMAINS:
+            return you_worship(GOD_BEOGH);
+        case DID_DESECRATE_HOLY_REMAINS:
+            return is_good_god(you.religion);
+        default:
+            die("Unexpected chunk conduct type %d!", conduct);
+    }
+}
+
+/**
+ * How intelligent was the monster that the given corpse came from?
+ *
+ * @param   The corpse being examined.
+ * @return  The mon_intel_type of the monster that the given corpse was
+ *          produced from.
+ */
+static mon_intel_type _chunk_intelligence(const item_def &corpse)
+{
+    // An optimising compiler can assume an enum value is in range, so
+    // check the range on the uncast value.
+    const bool bad = corpse.orig_monnum < 0
+                     || corpse.orig_monnum >= NUM_MONSTERS;
+    const monster_type orig_mt = static_cast<monster_type>(corpse.orig_monnum);
+    const monster_type type = bad || invalid_monster_type(orig_mt)
+                                ? corpse.mon_type
+                                : orig_mt;
+    return mons_class_intel(type);
+}
+
+/**
+ * List the god conducts (e.g. cannibalism) associated with the monster a given
+ * food item (corpse or chunk stack) comes from.
+ *
+ * @param[in] chunks        The food in question.
+ * @param[out] conducts     A vector of conduct_type.
+ */
+void get_food_conducts(const item_def &food, CrawlVector &conducts)
+{
+    if (food.props.exists(CHUNK_CONDUCT_KEY))
+    {
+        conducts = food.props[CHUNK_CONDUCT_KEY].get_vector();
+        return;
+    }
+
+    if (is_player_same_genus(food.mon_type))
+        conducts.push_back(DID_CANNIBALISM);
+
+    if (_chunk_intelligence(food) >= I_NORMAL)
+        conducts.push_back(DID_EAT_SOULED_BEING);
+
+    if (mons_genus(food.mon_type) == MONS_ORC)
+        conducts.push_back(DID_DESECRATE_ORCISH_REMAINS);
+
+    if (mons_class_holiness(food.mon_type) == MH_HOLY)
+        conducts.push_back(DID_DESECRATE_HOLY_REMAINS);
+}
+
+/**
+ * Is the given food item forbidden to the player by their god?
+ *
+ * @param food  The food item in question.
+ * @return      Whether your god hates you eating it.
+ */
 bool is_forbidden_food(const item_def &food)
 {
+    // no food is forbidden to the player who does not yet exist
+    if (!crawl_state.need_save)
+        return false;
+
+    // only corpses & chunks are ever forbidden.
     if (food.base_type != OBJ_CORPSES
         && (food.base_type != OBJ_FOOD || food.sub_type != FOOD_CHUNK))
     {
         return false;
     }
 
-    // Some gods frown upon cannibalistic behaviour.
-    if (god_hates_cannibalism(you.religion)
-        && is_player_same_genus(food.mon_type))
-    {
-        return true;
-    }
+    CrawlVector conducts;
+    get_food_conducts(food, conducts);
+    for (int i = 0; i < conducts.size(); i++)
+        if (_god_hates_conduct(static_cast<conduct_type>(conducts[i].get_int())))
+                return true;
 
-    // Holy gods do not like it if you are eating holy creatures
-    if (is_good_god(you.religion)
-        && mons_class_holiness(food.mon_type) == MH_HOLY)
-    {
-        return true;
-    }
-
-    // Zin doesn't like it if you eat beings with a soul.
-    if (you_worship(GOD_ZIN) && _chunk_intelligence(food) >= I_NORMAL)
-        return true;
-
-    // Everything else is allowed.
     return false;
 }
+
+#ifdef DEBUG_DIAGNOSTICS
+/**
+ * return a string describing a given food conduct
+ */
+static string _get_hate_reason(int conduct)
+{
+    switch (conduct)
+    {
+        case DID_CANNIBALISM:
+            return "cannibal";
+        case DID_EAT_SOULED_BEING:
+            return "smart";
+        case DID_DESECRATE_ORCISH_REMAINS:
+            return "orc";
+        case DID_DESECRATE_HOLY_REMAINS:
+            return "holy";
+        default:
+            return "????";
+    }
+}
+
+/**
+ * list conduct props on the given food item
+ */
+string food_hate_reasons(const item_def &food)
+{
+    CrawlVector conducts;
+    get_food_conducts(food, conducts);
+
+    string hate_reasons = "";
+    for (int i = 0; i < conducts.size(); i++)
+        hate_reasons += _get_hate_reason(conducts[i].get_int()) +", ";
+    return hate_reasons + "";
+}
+#endif
 
 bool can_ingest(const item_def &food, bool suppress_msg, bool check_hunger)
 {

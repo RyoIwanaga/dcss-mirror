@@ -1883,16 +1883,14 @@ string get_item_description(const item_def &item, bool verbose,
                 break;
             }
 
-            if ((god_hates_cannibalism(you.religion)
-                   && is_player_same_genus(item.mon_type))
-                || (you_worship(GOD_ZIN)
-                   && mons_class_intel(item.mon_type) >= I_NORMAL)
-                || (is_good_god(you.religion)
-                   && mons_class_holiness(item.mon_type) == MH_HOLY))
+            if (is_forbidden_food(item))
             {
                 description << "\n\n" << uppercase_first(god_name(you.religion))
                             << " disapproves of eating such meat.";
             }
+#ifdef DEBUG_DIAGNOSTICS
+            description << "\nConducts: " << food_hate_reasons(item);
+#endif
         }
         break;
 

@@ -12,6 +12,7 @@
 #include "delay.h"
 #include "enum.h"
 #include "env.h"
+#include "food.h"
 #include "hints.h"
 #include "itemprop.h"
 #include "items.h"
@@ -714,6 +715,22 @@ void remove_newest_perishable_item(item_def &stack, int quant)
     _sort_cvec<int>(timer);
 }
 
+/**
+ * Add a god conduct to a given list (set) if it's not already present.
+ *
+ * XXX: this is very ugly.
+ *
+ * @param conduct       The conduct to add.
+ * @param conducts      The list of conducts to add the conduct to.
+ */
+static void _add_if_not_present(int conduct, CrawlVector &conducts)
+{
+    for (int i = 0; i < conducts.size(); i++)
+        if (conducts[i].get_int() == conduct)
+            return;
+    conducts.push_back(conduct);
+}
+
 void merge_perishable_stacks(const item_def &source, item_def &dest, int quant)
 {
     if (!source.defined() || !dest.defined())
@@ -758,4 +775,20 @@ void merge_perishable_stacks(const item_def &source, item_def &dest, int quant)
 
     // Re-sort timer.
     _sort_cvec<int>(timer2);
+
+    // handle god conduct props.
+    if (_is_chunk(source))
+    {
+        CrawlVector source_conducts;
+        get_food_conducts(source, source_conducts);
+
+        CrawlVector dest_conducts;
+        get_food_conducts(source, dest_conducts);
+
+        for (int i = 0; i < source_conducts.size(); i++)
+            _add_if_not_present(source_conducts[i].get_int(), dest_conducts);
+
+        if (!props2.exists(CHUNK_CONDUCT_KEY))
+            props2[CHUNK_CONDUCT_KEY] = dest_conducts;
+    }
 }

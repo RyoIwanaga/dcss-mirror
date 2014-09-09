@@ -23,6 +23,8 @@
 #define HUNGER_DEFAULT       5900
 #define HUNGER_MAXIMUM      11900
 
+#define CHUNK_CONDUCT_KEY "chunk_conducts"
+
 bool eat_food(int slot = -1);
 
 void make_hungry(int hunger_amount, bool suppress_msg, bool magic = false);
@@ -38,10 +40,14 @@ bool is_contaminated(const item_def &food);
 bool causes_rot(const item_def &food);
 bool is_inedible(const item_def &item);
 bool is_preferred_food(const item_def &food);
+void get_food_conducts(const item_def &corpse, CrawlVector &conducts);
 bool is_forbidden_food(const item_def &food);
 corpse_effect_type determine_chunk_effect(corpse_effect_type chunktype,
                                                   bool rotten_chunk);
 int contamination_ratio(corpse_effect_type chunk_effect);
+#ifdef DEBUG_DIAGNOSTICS
+string food_hate_reasons(const item_def &food);
+#endif
 
 bool can_ingest(const item_def &food, bool suppress_msg,
                 bool check_hunger = true);

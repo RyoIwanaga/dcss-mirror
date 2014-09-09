@@ -1422,10 +1422,13 @@ bool items_similar(const item_def &item1, const item_def &item2)
     if (item1.base_type == OBJ_MISSILES && item1.special != item2.special)
         return false;
 
+    // don't merge chunks with different food types, rotten status, or
+    // anathema status.
     if (item1.base_type == OBJ_FOOD && item2.sub_type == FOOD_CHUNK
         && (mons_corpse_effect(item1.mon_type) !=
             mons_corpse_effect(item2.mon_type)
-            || food_is_rotten(item1) != food_is_rotten(item2)))
+            || food_is_rotten(item1) != food_is_rotten(item2)
+            || is_forbidden_food(item1) != is_forbidden_food(item2)))
     {
         return false;
     }
