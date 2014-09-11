@@ -1352,10 +1352,8 @@ static void _remove_equipment(const set<equipment_type>& removed,
         {
             if (e == EQ_WEAPON)
             {
-                const int slot = you.equip[EQ_WEAPON];
                 unwield_item(!you.berserk());
                 canned_msg(MSG_EMPTY_HANDED_NOW);
-                you.attribute[ATTR_WEAPON_SWAP_INTERRUPTED] = slot + 1;
             }
             else
                 unequip_item(e);
@@ -1842,12 +1840,7 @@ bool transform(int pow, transformation_type which_trans, bool involuntary,
     // else (as does the "End Transformation" ability). As it is, you
     // pay with mana and hunger if you already untransformed.
     if (!just_check && previous_trans != TRAN_NONE)
-    {
-        // Skip wielding weapon if it gets melded again right away.
-        // (in the extremely rare case of a weapon swap being interrupted by
-        // a form change... do we really need to support this at all?)
-        untransform(!form_can_wield(which_trans), true);
-    }
+        untransform(true);
 
     // Catch some conditions which prevent transformation.
     if (you.undead_state()
@@ -2109,11 +2102,10 @@ bool transform(int pow, transformation_type which_trans, bool involuntary,
 /**
  * End the player's transformation and return them to their normal
  * form.
- * @param skip_wielding  If true, don't swap the player's weapon back.
  * @param skip_move      If true, skip any move that was in progress before
  *                       the transformation ended.
  */
-void untransform(bool skip_wielding, bool skip_move)
+void untransform(bool skip_move)
 {
     const flight_type old_flight = you.flight_mode();
 
@@ -2261,9 +2253,6 @@ void untransform(bool skip_wielding, bool skip_move)
             you.stop_being_constricted();
     }
 
-    if (!skip_wielding)
-        handle_interrupted_swap();
-
     you.turn_is_over = true;
     if (you.transform_uncancellable)
         you.transform_uncancellable = false;
@@ -2282,7 +2271,7 @@ static void _extra_hp(int amount_extra) // must also set in calc_hp
 void emergency_untransform()
 {
     mpr("You quickly transform back into your natural form.");
-    untransform(false, true); // We're already entering the water.
+    untransform(true); // We're already entering the water.
 
     if (you.species == SP_MERFOLK)
         merfolk_start_swimming(false);

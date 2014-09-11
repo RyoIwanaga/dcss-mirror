@@ -933,9 +933,8 @@ bool player_weapon_wielded()
 bool berserk_check_wielded_weapon()
 {
     const item_def * const wpn = you.weapon();
-    if (wpn && (wpn->defined() && (!is_melee_weapon(*wpn)
-                                   || needs_handle_warning(*wpn, OPER_ATTACK))
-                || you.attribute[ATTR_WEAPON_SWAP_INTERRUPTED]))
+    if (wpn && wpn->defined() && (!is_melee_weapon(*wpn)
+                                   || needs_handle_warning(*wpn, OPER_ATTACK)))
     {
         string prompt = "Do you really want to go berserk while wielding "
                         + wpn->name(DESC_YOUR) + "?";
@@ -945,8 +944,6 @@ bool berserk_check_wielded_weapon()
             canned_msg(MSG_OK);
             return false;
         }
-
-        you.attribute[ATTR_WEAPON_SWAP_INTERRUPTED] = 0;
     }
 
     return true;
@@ -8220,7 +8217,7 @@ void temperature_changed(float change)
 
         // Handled separately because normally heat doesn't affect this.
         if (you.form == TRAN_ICE_BEAST || you.form == TRAN_STATUE)
-            untransform(true, false);
+            untransform(false);
     }
 
     // Just reached the temp that kills off stoneskin.
