@@ -19,6 +19,7 @@
 #include "attitude-change.h"
 #include "beam.h"
 #include "bloodspatter.h"
+#include "butcher.h"
 #include "cloud.h"
 #include "coordit.h"
 #include "database.h"
@@ -671,6 +672,96 @@ bool melee_attack::handle_phase_aux()
     }
 
     return true;
+}
+
+/**
+ * Devour a monster whole!.
+ *
+ * @param defender  The monster in question.
+ */
+static void _hydra_devour(monster &victim)
+{
+    const bool filling = !in_good_standing(GOD_GOZAG)
+                          && player_mutation_level(MUT_HERBIVOROUS, false) < 3;
+
+    mprf("You %sdevour %s!",
+         filling ? "hungrily " : "",
+         victim.name(DESC_THE).c_str());
+
+    // nutrition (maybe)
+    if (filling)
+    {
+        const int equiv_chunks =
+        1+random2(get_max_corpse_chunks(victim.type));
+        lessen_hunger(CHUNK_BASE_NUTRITION * equiv_chunks, false);
+    }
+
+    // healing
+    if (!you.duration[DUR_DEATHS_DOOR])
+    {
+        const int healing = 1 + victim.get_experience_level() * 3 / 2
+                              + random2(victim.get_experience_level() * 3 / 2);
+        you.heal(healing);
+        calc_hp();
+        mpr("You feel better.");
+        dprf("healed for %d (%d hd)", healing, victim.get_experience_level());
+    }
+
+    // and devour the corpse.
+    victim.props["never_corpse"] = true;
+}
+
+/**
+ * Possibly devour the defender whole.
+ *
+ * @param defender  The defender in question.
+ */
+static void _hydra_consider_devouring(monster &defender)
+{
+    ASSERT(!crawl_state.game_is_arena());
+
+    // no unhealthy food
+    if (determine_chunk_effect(mons_corpse_effect(defender.type), false)
+        != CE_CLEAN)
+    {
+        return;
+    }
+
+    // or food that would incur divine penance...
+    if (god_hates_eating(you.religion, &defender))
+        return;
+
+    // can't eat enemies that leave no corpses...
+    if (!mons_class_can_leave_corpse(defender.type)
+        || defender.is_summoned()
+        || defender.flags & MF_HARD_RESET)
+    {
+        return;
+    }
+
+    // or monsters as large as you are!
+    if (defender.body_size() >= you.body_size())
+        return;
+
+    // chow down.
+    _hydra_devour(defender);
+}
+
+/**
+ * Handle effects that fire when the defender (the target of the attack) is
+ * killed.
+ *
+ * @return  Not sure; it seems to never be checked & always be true?
+ */
+bool melee_attack::handle_phase_killed()
+{
+    if (attacker->is_player() && you.form == TRAN_HYDRA
+        && defender->is_monster()) // better safe than sorry
+    {
+        _hydra_consider_devouring(*defender->as_monster());
+    }
+
+    return attack::handle_phase_killed();
 }
 
 bool melee_attack::handle_phase_end()
