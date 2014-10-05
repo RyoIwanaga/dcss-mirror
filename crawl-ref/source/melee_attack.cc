@@ -723,28 +723,50 @@ static void _hydra_consider_devouring(monster &defender)
 {
     ASSERT(!crawl_state.game_is_arena());
 
+    dprf("considering devouring");
+
     // no unhealthy food
     if (determine_chunk_effect(mons_corpse_effect(defender.type), false)
-        != CE_CLEAN)
+            != CE_CLEAN)
     {
         return;
     }
+
+    dprf("chunk ok");
+
+    // shapeshifters are mutagenic
+    if (defender.is_shapeshifter())
+    {
+        // handle this carefully, so the player knows what's going on
+        mprf("You spit out %s as %s twists & changes in your mouth!",
+             defender.name(DESC_THE).c_str(),
+             defender.pronoun(PRONOUN_SUBJECTIVE).c_str());
+        return;
+    }
+
+    dprf("shifter ok");
 
     // or food that would incur divine penance...
     if (god_hates_eating(you.religion, &defender))
         return;
 
+    dprf("god ok");
+
     // can't eat enemies that leave no corpses...
-    if (!mons_class_can_leave_corpse(defender.type)
+    if (!mons_class_can_leave_corpse(mons_species(defender.type))
         || defender.is_summoned()
         || defender.flags & MF_HARD_RESET)
     {
         return;
     }
 
+    dprf("corpse ok");
+
     // or monsters as large as you are!
     if (defender.body_size() >= you.body_size())
         return;
+
+    dprf("size ok");
 
     // chow down.
     _hydra_devour(defender);
