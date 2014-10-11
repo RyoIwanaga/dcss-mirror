@@ -851,8 +851,7 @@ static bool _is_damage_threatening (int damage_fraction_of_hp)
 
 // death_source should be set to NON_MONSTER for non-monsters. {dlb}
 void ouch(int dam, int death_source, kill_method_type death_type,
-          const char *aux, bool see_source, const char *death_source_name,
-          bool attacker_effects)
+          const char *aux, bool see_source, const char *death_source_name)
 {
     ASSERT(!crawl_state.game_is_arena());
     if (you.duration[DUR_TIME_STEP])
