@@ -299,6 +299,10 @@ void item_colour(item_def &item)
         case ARM_SHADOW_DRAGON_ARMOUR:
             item.colour = mons_class_colour(MONS_SHADOW_DRAGON);
             break;
+        case ARM_QUICKSILVER_DRAGON_HIDE:
+        case ARM_QUICKSILVER_DRAGON_ARMOUR:
+            item.colour = mons_class_colour(MONS_QUICKSILVER_DRAGON);
+            break;
         default:
             item.colour = _armour_colour(item);
             break;
