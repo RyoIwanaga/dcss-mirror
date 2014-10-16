@@ -327,6 +327,7 @@ static int _acquirement_armour_subtype(bool divine, int & /*quantity*/)
                                              5, ARM_SHADOW_DRAGON_ARMOUR,
                                              5, ARM_GOLD_DRAGON_ARMOUR,
                                              5, ARM_PEARL_DRAGON_ARMOUR,
+                                             5, ARM_QUICKSILVER_DRAGON_ARMOUR,
                                              0);
         }
     }
