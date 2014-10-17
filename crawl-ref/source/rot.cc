@@ -281,7 +281,10 @@ static void _make_rot_stack(item_def &stack, item_def &old_stack,
                             vector<int> &age_timer)
 {
     stack.base_type = old_stack.base_type;
-    stack.sub_type  = _is_chunk(old_stack) ? FOOD_CHUNK : POT_BLOOD_COAGULATED;
+    if (_is_chunk(old_stack))
+        stack.sub_type = FOOD_CHUNK;
+    else
+        stack.sub_type = POT_BLOOD_COAGULATED;
     stack.quantity  = age_timer.size();
     stack.plus      = old_stack.plus;
     stack.plus2     = old_stack.plus2;
