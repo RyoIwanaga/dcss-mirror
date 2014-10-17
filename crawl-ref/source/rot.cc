@@ -7,6 +7,8 @@
 
 #include "rot.h"
 
+#include <algorithm>
+
 #include "areas.h"
 #include "butcher.h"
 #include "delay.h"
