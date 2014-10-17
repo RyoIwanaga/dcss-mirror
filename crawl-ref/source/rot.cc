@@ -10,13 +10,13 @@
 #include "areas.h"
 #include "butcher.h"
 #include "delay.h"
+#include "english.h"
 #include "enum.h"
 #include "env.h"
 #include "hints.h"
 #include "itemprop.h"
 #include "items.h"
 #include "makeitem.h"
-#include "misc.h"
 #include "mon-death.h"
 #include "player.h"
 #include "player-equip.h"
@@ -48,8 +48,8 @@ static void _make_rot_stack(item_def &stack, item_def &old_stack,
 static void _print_chunk_messages(int num_chunks, int num_chunks_gone,
                                   vector<char> &rotten_items);
 
-static void _print_potion_messages(int num_potions, int num_potions_gone,
-                                   vector<char> &rotten_items);
+static void _potion_stack_changed_message(string item_name, int num_changed,
+                                          int remainder, string verb);
 
 
 /** * Checks if a given item is a stack of chunks.
@@ -461,8 +461,6 @@ static int _rot_stack(item_def &it, int slot, bool in_inv, char &rot_dest)
  */
 void rot_floor_items(int elapsedTime)
 {
-    dprf("rotting for %d", elapsedTime);
-
     if (elapsedTime <= 0)
         return;
 
@@ -500,13 +498,9 @@ void rot_floor_items(int elapsedTime)
 void rot_inventory_food(int time_delta)
 {
     vector<char> rotten_chunks;
-    vector<char> coagulated_potions;
 
     int num_chunks         = 0;
     int num_chunks_gone    = 0;
-
-    int num_potions        = 0;
-    int num_potions_gone   = 0;
 
     for (int i = 0; i < ENDOFPACK; i++)
     {
@@ -527,14 +521,14 @@ void rot_inventory_food(int time_delta)
         }
 #endif
 
+        const int initial_quantity = item.quantity;
+        const string item_name = item.name(DESC_PLAIN, false);
         const bool is_chunk = _is_chunk(item);
+
         if (is_chunk)
             num_chunks += item.quantity;
         else
-        {
             ASSERT(is_blood_potion(item));
-            num_potions += item.quantity;
-        }
 
         char rot_slot = -1;
         const int rotted_away_count = _rot_stack(item, i, true, rot_slot);
@@ -546,14 +540,24 @@ void rot_inventory_food(int time_delta)
         }
         else
         {
-            num_potions_gone += rotted_away_count;
-            if (rot_slot != -1)
-                coagulated_potions.push_back(index_to_letter(rot_slot));
+            const int remainder = item.quantity;
+            const int coagulated_count = initial_quantity - remainder -
+                                         rotted_away_count;
+
+            if (rotted_away_count)
+            {
+                _potion_stack_changed_message(item_name, rotted_away_count,
+                                              initial_quantity, "rot%s away");
+            }
+            if (coagulated_count)
+            {
+                _potion_stack_changed_message(item_name, coagulated_count,
+                                              initial_quantity, "coagulate%s");
+            }
         }
     }
 
     _print_chunk_messages(num_chunks, num_chunks_gone, rotten_chunks);
-    _print_potion_messages(num_potions, num_potions_gone, coagulated_potions);
 }
 
 static void _print_chunk_messages(int num_chunks, int num_chunks_gone,
@@ -622,39 +626,18 @@ static void _print_chunk_messages(int num_chunks, int num_chunks_gone,
     }
 }
 
-static void _print_potion_messages(int num_potions, int num_potions_gone,
-                                   vector<char> &rotten_items)
-{
-    if (!rotten_items.empty())
-    {
-        mprf(MSGCH_ROTTEN_MEAT,
-             "Something in your inventory has coagulated. (slot%s %s)",
-             rotten_items.size() > 1 ? "s" : "",
-             comma_separated_line(rotten_items.begin(),
-                                  rotten_items.end()).c_str());
-    }
-
-
-    if (num_potions_gone > 0)
-    {
-        mprf(MSGCH_ROTTEN_MEAT,
-             "%s of the blood in your inventory has rotted away.",
-             num_potions_gone == num_potions ? "All" : "Some");
-    }
-}
-/*
 // Prints messages for blood potions coagulating or rotting in inventory.
-static void _potion_stack_changed_message(item_def &potion, int num_changed,
-                                          string verb)
+static void _potion_stack_changed_message(string item_name, int num_changed,
+                                          int initial_quantity, string verb)
 {
     ASSERT(num_changed > 0);
 
     verb = replace_all(verb, "%s", num_changed == 1 ? "s" : "");
     mprf(MSGCH_ROTTEN_MEAT, "%s %s %s.",
-         get_desc_quantity(num_changed, potion.quantity).c_str(),
-         potion.name(DESC_PLAIN, false).c_str(),
+         get_desc_quantity(num_changed, initial_quantity).c_str(),
+         item_name.c_str(),
          verb.c_str());
-}*/
+}
 
 // Removes the oldest timer of a stack of blood potions.
 // Mostly used for (q)uaff and (f)ire.
