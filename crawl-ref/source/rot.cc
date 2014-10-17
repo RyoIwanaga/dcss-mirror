@@ -419,6 +419,10 @@ static int _rot_stack(item_def &it, int slot, bool in_inv, char &rot_dest)
     item_def rot_stack;
     if (rot_count)
         _make_rot_stack(rot_stack, it, rot_timer);
+    // where is the item?
+    const coord_def dest = in_inv ?               you.pos() :
+                           it.held_by_monster() ? it.holding_monster()->pos() :
+                                                  it.pos;
 
     bool destroyed;
     if (in_inv)
@@ -444,10 +448,6 @@ static int _rot_stack(item_def &it, int slot, bool in_inv, char &rot_dest)
                                          rot_dest, true))
     {
         // else, place it on the floor
-        const coord_def dest = in_inv ? you.pos() :
-                                        it.held_by_monster() ?
-                                             it.holding_monster()->pos() :
-                                             it.pos;
         _merge_rot_stack_onto_floor(rot_stack, dest);
     }
 
