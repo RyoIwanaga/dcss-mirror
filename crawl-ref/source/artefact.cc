@@ -939,7 +939,8 @@ static void _get_randart_properties(const item_def &item,
     // res magic
     if (!done_powers
         && one_chance_in(4 + power_level)
-        && (aclass != OBJ_JEWELLERY || atype != RING_PROTECTION_FROM_MAGIC))
+        && (aclass != OBJ_JEWELLERY || atype != RING_PROTECTION_FROM_MAGIC)
+        && (aclass != OBJ_ARMOUR || atype != ARM_QUICKSILVER_DRAGON_ARMOUR))
     {
         proprt[ARTP_MAGIC] = one_chance_in(3) ? 2 : 1;
         power_level++;
@@ -1078,8 +1079,9 @@ static void _get_randart_properties(const item_def &item,
             proprt[ARTP_COLD] = -1;
             break;
         case 7:                     // less stealthy
-            if (aclass == OBJ_JEWELLERY
+            if ((aclass == OBJ_JEWELLERY
                 && (atype == RING_LOUDNESS || atype == RING_STEALTH))
+                || (aclass == OBJ_ARMOUR && atype == ARM_SHADOW_DRAGON_ARMOUR))
             {
                 break;
             }
