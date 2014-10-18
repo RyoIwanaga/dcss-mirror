@@ -99,7 +99,7 @@ static const armour_def Armour_prop[] =
                                                           3,  -6,  200,
         EQ_BODY_ARMOUR, SIZE_LITTLE, SIZE_GIANT, false },
     { ARM_QUICKSILVER_DRAGON_ARMOUR, "quicksilver dragon armour",
-                                                          7,  -6,  200,
+                                                         10,  -6,  200,
         EQ_BODY_ARMOUR, SIZE_LITTLE, SIZE_GIANT, false },
     { ARM_SWAMP_DRAGON_HIDE,    "swamp dragon hide",      3,  -7,  200,
         EQ_BODY_ARMOUR, SIZE_LITTLE, SIZE_GIANT, false },
@@ -1036,6 +1036,9 @@ bool hide2armour(item_def &item)
 int armour_max_enchant(const item_def &item)
 {
     ASSERT(item.base_type == OBJ_ARMOUR);
+
+    if (item.sub_type == ARM_QUICKSILVER_DRAGON_ARMOUR)
+        return 0;
 
     const int eq_slot = get_armour_slot(item);
 
