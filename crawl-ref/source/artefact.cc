@@ -426,7 +426,7 @@ void artefact_desc_properties(const item_def &item,
         switch (item.sub_type)
         {
         case ARM_QUICKSILVER_DRAGON_ARMOUR:
-            proprt[ARTP_MAGIC] += 2;
+            ++proprt[ARTP_MAGIC];
             break;
         case ARM_SWAMP_DRAGON_ARMOUR:
             ++proprt[ARTP_POISON];
