@@ -2034,6 +2034,8 @@ tileidx_t tileidx_monster_base(int type, bool in_water, int colour, int number,
     // goblins and gnolls ('g')
     case MONS_IJYB:
         return TILEP_MONS_IJYB;
+    case MONS_NAWAB:
+        return TILEP_MONS_NAWAB;
     case MONS_CRAZY_YIUF:
         return TILEP_MONS_CRAZY_YIUF;
     case MONS_GRUM:

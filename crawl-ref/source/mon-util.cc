@@ -3600,6 +3600,7 @@ static gender_type _mons_class_gender(monster_type mc)
         switch (mc)
         {
         case MONS_JESSICA:
+        case MONS_NAWAB:
         case MONS_PSYCHE:
         case MONS_JOSEPHINE:
         case MONS_AGNES:
@@ -3717,6 +3718,9 @@ bool monster_shover(const monster* m)
     // Geryon really profits from *not* pushing past hell beasts.
     if (m->type == MONS_GERYON)
         return false;
+    // Likewise, Nawab Begum and her mob.
+    if (m->type == MONS_NAWAB)
+        return false;
 
     // no dumb creatures pushing, aside from jellies, which just kind of ooze.
     return mons_intel(m) >= I_REPTILE || mons_genus(m->type) == MONS_JELLY;
@@ -3745,6 +3749,10 @@ bool monster_shover(const monster* m)
 
     // Fannar's ice beasts can push past Fannar, who benefits from this.
     if (m1->type == MONS_ICE_BEAST && m2->type == MONS_FANNAR)
+        return true;
+
+    // Similarly, Nawab Begum's mob.
+    if (mons_genus(m1->type) == MONS_GOBLIN && m2->type == MONS_NAWAB)
         return true;
 
     // Special-case spectral things to push past things that summon them

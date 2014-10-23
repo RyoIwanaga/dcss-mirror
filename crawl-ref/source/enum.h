@@ -3037,6 +3037,7 @@ enum monster_type                      // menv[].type
     MONS_ASTERION,
     MONS_NATASHA,
     MONS_VASHNIA,
+    MONS_NAWAB,
 #endif
     // Sprint uniques:
     MONS_CHUCK,
@@ -3212,6 +3213,8 @@ enum monster_type                      // menv[].type
     MONS_MNOLEG_TENTACLE,
     MONS_MNOLEG_TENTACLE_SEGMENT,
     MONS_BENNU,
+
+    MONS_NAWAB,
 #endif
 
     NUM_MONSTERS,               // used for polymorph
@@ -4273,6 +4276,7 @@ enum spell_type
     SPELL_PARALYSIS_GAZE,
     SPELL_CONFUSION_GAZE,
     SPELL_DRAINING_GAZE,
+    SPELL_GOBLIN_TOSS,
     NUM_SPELLS
 };
 
