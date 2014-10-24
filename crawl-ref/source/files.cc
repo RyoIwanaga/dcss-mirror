@@ -26,6 +26,8 @@
 #include <sys/time.h>
 #endif
 
+const static bool is_halloween = __DATE__ == "Oct 31 2014";
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -1191,9 +1193,11 @@ static void _make_level(dungeon_feature_type stair_taken,
         && !Options.seed
         && !player_in_branch(BRANCH_ABYSS)
         && (!player_in_branch(BRANCH_DUNGEON) || you.depth > 2)
-        && one_chance_in(3))
+        && one_chance_in(is_halloween ? 2 : 3))
     {
         load_ghost(true);
+        if (is_halloween && coinflip())
+            load_ghost(true);
     }
     env.turns_on_level = 0;
     // sanctuary
@@ -1805,8 +1809,11 @@ bool load_ghost(bool creating_level)
     }
     inf.close();
 
-    // Remove bones file - ghosts are hardly permanent.
-    unlink(ghost_filename.c_str());
+    if (!is_halloween || coinflip())
+    {
+        // Remove bones file - ghosts are hardly permanent.
+        unlink(ghost_filename.c_str());
+    }
 
     if (!debug_check_ghosts())
     {
