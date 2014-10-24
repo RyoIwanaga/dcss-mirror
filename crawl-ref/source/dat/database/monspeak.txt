@@ -5307,7 +5307,7 @@ Nawab Begum
 
 VISUAL:@The_monster@'s bangles clink loudly.
 
-VISUAL:The bindi on @the_monster@'s forehead glitters hypnotically.
+VISUAL:@The_monster@'s jewellery glitters hypnotically.
 
 w:5
 VISUAL:@The_monster@ flexes a bicep menacingly.
