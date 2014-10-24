@@ -26,8 +26,6 @@
 #include <sys/time.h>
 #endif
 
-const static bool is_halloween = __DATE__ == "Oct 31 2014";
-
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -1149,6 +1147,12 @@ static bool _leave_level(dungeon_feature_type stair_taken,
     return popped;
 }
 
+static bool today_is_halloween()
+{
+    const time_t curr_time = time(NULL);
+    const struct tm *date = TIME_FN(&curr_time);
+    return date->tm_mon == 10 && date->tm_mday == 31;
+}
 
 /**
  * Generate a new level.
@@ -1187,6 +1191,8 @@ static void _make_level(dungeon_feature_type stair_taken,
 
     _clear_env_map();
     builder(true, stair_type);
+
+    const bool is_halloween = today_is_halloween();
 
     if (!crawl_state.game_is_tutorial()
         && !crawl_state.game_is_zotdef()
@@ -1809,7 +1815,7 @@ bool load_ghost(bool creating_level)
     }
     inf.close();
 
-    if (!is_halloween || coinflip())
+    if (!today_is_halloween() || coinflip())
     {
         // Remove bones file - ghosts are hardly permanent.
         unlink(ghost_filename.c_str());
