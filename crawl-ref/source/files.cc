@@ -1202,9 +1202,10 @@ static void _make_level(dungeon_feature_type stair_taken,
         && (!player_in_branch(BRANCH_DUNGEON) || you.depth > 2)
         && one_chance_in(is_halloween ? 2 : 3))
     {
-        load_ghost(true);
         if (is_halloween && coinflip())
             load_ghost(true);
+        const bool delete_ghost = !today_is_halloween() || one_chance_in(3);
+        load_ghost(true, delete_ghost);
     }
     env.turns_on_level = 0;
     // sanctuary
@@ -1753,9 +1754,10 @@ static string _find_ghost_file()
  * Attempt to load one or more ghosts into the level.
  *
  * @param creating_level    Whether a level is currently being generated.
+ * @param delete_file       Whether to delete the ghost file after loading it.
  * @return                  Whether ghosts were actually generated.
  */
-bool load_ghost(bool creating_level)
+bool load_ghost(bool creating_level, bool delete_file)
 {
     const bool wiz_cmd = (crawl_state.prev_cmd == CMD_WIZARD);
 
@@ -1816,7 +1818,7 @@ bool load_ghost(bool creating_level)
     }
     inf.close();
 
-    if (!today_is_halloween() || coinflip())
+    if (delete_file)
     {
         // Remove bones file - ghosts are hardly permanent.
         unlink(ghost_filename.c_str());
