@@ -1311,5 +1311,5 @@ bool today_is_halloween()
     const time_t curr_time = time(NULL);
     const struct tm *date = TIME_FN(&curr_time);
     // tm_mon is zero-based in case you are wondering
-    return date->tm_mon == 9 && date->tm_mday == 25;
+    return date->tm_mon == 9 && date->tm_mday == 31;
 }
