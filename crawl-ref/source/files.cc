@@ -1206,10 +1206,7 @@ static void _make_level(dungeon_feature_type stair_taken,
     _clear_env_map();
     builder(true, stair_type);
 
-    const time_t curr_time = time(NULL);
-    const struct tm *date = TIME_FN(&curr_time);
-    // tm_mon is zero-based in case you are wondering
-    const bool is_halloween = date->tm_mon == 9 && date->tm_mday == 31;
+    const bool is_halloween = today_is_halloween();
 
     if (!crawl_state.game_is_tutorial()
         && !crawl_state.game_is_zotdef()
