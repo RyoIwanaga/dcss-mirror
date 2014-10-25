@@ -1148,6 +1148,27 @@ static bool _leave_level(dungeon_feature_type stair_taken,
 }
 
 /**
+ * Warn the player that two ghost files have been loaded into the current
+ * level, resulting in somewhere between two and twenty ghosts being present.
+ *
+ * Warnings may be more spooky than actually useful.
+ *
+ * @return  A message that will send shivers down players' spines, assuming
+ *          they aren't in wisp form!
+ */
+static const char* _double_ghost_spookmessage()
+{
+    static const char* spookmessages[] = {
+        "You are filled with an overwhelming sense of foreboding!",
+        "You feel a terrible frisson of fear!",
+        "You are flooded with an inexplicable sense of dread!",
+        "You feel that you have entered a very terrible place...",
+        "There is something very spooky about this place!"
+    };
+    return RANDOM_ELEMENT(spookmessages);
+}
+
+/**
  * Generate a new level.
  *
  * Cleanup the environment, build the level, and possibly place a ghost or
@@ -1198,7 +1219,10 @@ static void _make_level(dungeon_feature_type stair_taken,
         && one_chance_in(is_halloween ? 2 : 3))
     {
         if (is_halloween && coinflip())
+        {
+            mpr(_double_ghost_spookmessage());
             load_ghost(true);
+        }
         const bool delete_ghost = !is_halloween || one_chance_in(3);
         load_ghost(true, delete_ghost);
     }
