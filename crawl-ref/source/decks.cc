@@ -2105,13 +2105,23 @@ static void _crusade_card(int power, deck_rarity_type rarity)
 static void _summon_demon_card(int power, deck_rarity_type rarity)
 {
     const int power_level = _get_power_level(power, rarity);
-    monster_type dct;
+    // one demon, and one other demonic creature
+    monster_type dct, dct2;
     if (power_level >= 2)
+    {
         dct = RANDOM_DEMON_GREATER;
+        dct2 = MONS_PANDEMONIUM_LORD;
+	}
     else if (power_level == 1)
+    {
         dct = RANDOM_DEMON_COMMON;
+        dct2 = MONS_RAKSHASA;
+	}
     else
+    {
         dct = RANDOM_DEMON_LESSER;
+        dct2 = MONS_HELL_HOUND;
+	}
 
     // FIXME: The manual testing for message printing is there because
     // we can't rely on create_monster() to do it for us. This is
@@ -2126,6 +2136,12 @@ static void _summon_demon_card(int power, deck_rarity_type rarity)
     {
         mpr("You see a puff of smoke.");
     }
+    
+    create_monster( 
+			mgen_data(dct2,
+					  BEH_FRIENDLY, &you, 5 - power_level, 0, you.pos(), MHITYOU,
+					  MG_AUTOFOE));
+ 
 }
 
 static void _summon_animals(int power)
