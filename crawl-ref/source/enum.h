@@ -461,7 +461,8 @@ enum beam_type                  // bolt::flavour
     BEAM_CHAOTIC_REFLECTION,
     BEAM_DRAIN_MAGIC,
     BEAM_TUKIMAS_DANCE,
-    BEAM_LAST_ENCHANTMENT = BEAM_TUKIMAS_DANCE,
+    BEAM_RESISTANCE,
+    BEAM_LAST_ENCHANTMENT = BEAM_RESISTANCE,
 
     BEAM_MEPHITIC,
     BEAM_INK,
@@ -1840,6 +1841,7 @@ enum enchant_type
     ENCH_REPEL_MISSILES,
     ENCH_DEFLECT_MISSILES,
     ENCH_NEGATIVE_VULN,
+    ENCH_RESISTANCE,
     // Update enchantment names in mon-ench.cc when adding or removing
     // enchantments.
     NUM_ENCHANTMENTS

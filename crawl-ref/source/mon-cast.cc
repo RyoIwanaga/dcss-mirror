@@ -136,6 +136,9 @@ static bool _flavour_benefits_monster(beam_type flavour, monster& monster)
 
     case BEAM_AGILITY:
         return !monster.has_ench(ENCH_AGILE);
+        
+    case BEAM_RESISTANCE:
+		return !monster.has_ench(ENCH_RESISTANCE);
 
     default:
         return false;

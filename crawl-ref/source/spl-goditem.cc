@@ -421,7 +421,8 @@ void debuff_monster(monster* mon)
         ENCH_STICKY_FLAME,
         ENCH_TP,
         ENCH_INNER_FLAME,
-        ENCH_OZOCUBUS_ARMOUR
+        ENCH_OZOCUBUS_ARMOUR,
+        ENCH_RESISTANCE
     };
 
     bool dispelled = false;

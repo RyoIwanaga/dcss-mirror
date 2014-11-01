@@ -3099,6 +3099,7 @@ bool bolt::harmless_to_player() const
     case BEAM_MIGHT:
     case BEAM_AGILITY:
     case BEAM_INVISIBILITY:
+    case BEAM_RESISTANCE:
         return true;
 
     case BEAM_HOLY:
@@ -3754,6 +3755,13 @@ void bolt::affect_player_enchantment(bool resistible)
         cast_tukimas_dance(ench_power, &you);
         obvious_effect = true;
         break;
+        
+    case BEAM_RESISTANCE:
+        potion_effect(POT_RESISTANCE, ench_power, nullptr, blame_player);
+        obvious_effect = true;
+        nasty = false;
+        nice  = true;
+        break;        
 
     default:
         // _All_ enchantments should be enumerated here!
@@ -5051,6 +5059,7 @@ bool bolt::has_saving_throw() const
     case BEAM_VIRULENCE:        // saving throw handled specially
     case BEAM_IGNITE_POISON:
     case BEAM_AGILITY:
+    case BEAM_RESISTANCE:
         return false;
     case BEAM_VULNERABILITY:
         return !one_chance_in(3);  // Ignores MR 1/3 of the time
@@ -5641,6 +5650,15 @@ mon_resist_type bolt::apply_enchantment_to_monster(monster* mon)
         cast_tukimas_dance(ench_power, mon);
         obvious_effect = true;
         break;
+        
+    case BEAM_RESISTANCE:
+        if (!mon->has_ench(ENCH_RESISTANCE)
+            && mon->add_ench(ENCH_RESISTANCE))
+        {
+            if (simple_monster_message(mon, " suddenly seems more resistant."))
+                obvious_effect = true;
+        }
+        return MON_AFFECTED;        
 
     default:
         break;
@@ -6217,7 +6235,8 @@ bool bolt::nice_to(const monster* mon) const
         || flavour == BEAM_HEALING
         || flavour == BEAM_MIGHT
         || flavour == BEAM_AGILITY
-        || flavour == BEAM_INVISIBILITY)
+        || flavour == BEAM_INVISIBILITY
+        || flavour == BEAM_RESISTANCE)
     {
         return true;
     }
@@ -6468,6 +6487,7 @@ static string _beam_type_name(beam_type type)
     case BEAM_TUKIMAS_DANCE:         return "tukima's dance";
     case BEAM_BOUNCY_TRACER:         return "bouncy tracer";
     case BEAM_DEATH_RATTLE:          return "breath of the dead";
+    case BEAM_RESISTANCE:			  return "resistance";
 
     case NUM_BEAMS:                  die("invalid beam type");
     }
