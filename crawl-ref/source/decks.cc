@@ -2505,83 +2505,49 @@ static void _fortitude_card(int power, deck_rarity_type rarity)
 static void _storm_card(int power, deck_rarity_type rarity)
 {
     const int power_level = _get_power_level(power, rarity);
-    const int weak_num = (power_level == 0 && coinflip()) ? 2 : 1;
     
-    if (power_level > 0 || (power_level == 0 && coinflip()))
-	{
-		int which = random2(2);
-		
-		switch(which)
-		{
-			case 0:
-			{
-				int num_to_summ = 1 + random2(1 + power_level);
-				for (int i = 0; i < num_to_summ; ++i)
-				{
-					create_monster(
-					mgen_data(MONS_AIR_ELEMENTAL,
-							BEH_FRIENDLY, &you, 3, 0, you.pos(), MHITYOU,
-							MG_AUTOFOE));
-				}
-				break;
-			}
-			
-			case 1:	
-				big_cloud(CLOUD_STORM, &you, you.pos(),
-					50 + (power_level > 0) ? random2(20) : 0, 8 + random2(8));
-				wind_blast(&you, (power_level == 0) ? 100 : 200, coord_def(), true);
-				// remove the cloud under the player
-				if (env.cloud[env.cgrid(you.pos())].type == CLOUD_STORM)
-					env.cgrid(you.pos()) = EMPTY_CLOUD;
-				break;
-				
-		}
-	}
-
-	for (int i = 0; i < weak_num; ++i)
-	{
-		int which = random2((you_worship(GOD_CHEIBRIADOS)) ? 2 :3);
-		
-		switch(which)
-		{
-			case 0:
-				big_cloud(CLOUD_RAIN, &you, you.pos(),
-					30 + (power_level > 0) ? random2(20) : 0, 8 + random2(8));
-				break;
-
-			case 1: create_monster(
-					 mgen_data(MONS_SKY_BEAST,
-							BEH_FRIENDLY, &you, 3, 0, you.pos(), MHITYOU,
-							MG_AUTOFOE));
-				break;
-				
-			case 2: cast_swiftness(random2(power/4));
-				break;
-		}
-	}
+    if (coinflip())
+    {
+        int num_to_summ = 1 + random2(1 + power_level);
+        for (int i = 0; i < num_to_summ; ++i)
+        {
+            create_monster(
+                    mgen_data(MONS_AIR_ELEMENTAL,
+                              BEH_FRIENDLY, &you, 3, 0, you.pos(), MHITYOU,
+                              MG_AUTOFOE));
+        }
+    }
+    else
+    {    
+        big_cloud(CLOUD_STORM, &you, you.pos(),
+                   50 + (power_level > 0) ? random2(20) : 0, 20 + random2(8));
+        wind_blast(&you, (power_level == 0) ? 100 : 200, coord_def(), true);
+        // remove the cloud under the player
+        if (env.cloud[env.cgrid(you.pos())].type == CLOUD_STORM)
+            env.cgrid(you.pos()) = EMPTY_CLOUD;
+    }
 
 	if (power_level > 1 || (power_level == 1 && coinflip()))
 	{
-		int which = random2(2);
-		
-		switch(which)
-		{
-			case 0:  
-				if (create_monster(
-						mgen_data(MONS_TWISTER,
-							BEH_HOSTILE, &you, 1 + random2(power_level + 1),
-							0, you.pos(), MHITYOU)))
-				   {
-						mpr("A tornado forms.");
-				   }
-				break;
-				  
-			case 1: create_monster(
-						mgen_data(MONS_ELEMENTAL_WELLSPRING,
-							BEH_FRIENDLY, &you, 3, 0, you.pos(), MHITYOU,
-							MG_AUTOFOE));
-				break;
+        if (coinflip())
+        {
+            if (create_monster(
+                        mgen_data(MONS_TWISTER,
+                                  BEH_HOSTILE, &you, 1 + random2(power_level + 1),
+                                  0, you.pos(), MHITYOU)))
+            {
+                mpr("A tornado forms.");
+            }
 		}
+        else
+        {
+            // create some water so the wellspring can place
+            create_feat_splash(you.pos(), 2, 3);
+            create_monster(
+                    mgen_data(MONS_ELEMENTAL_WELLSPRING,
+							  BEH_FRIENDLY, &you, 3, 0, you.pos(), MHITYOU,
+							  MG_AUTOFOE));
+        }
 	}
  }
 
