@@ -104,13 +104,13 @@ const deck_archetype deck_of_emergency[] =
     { CARD_SHAFT,      {5, 5, 5} },
     { CARD_ALCHEMIST,  {5, 5, 5} },
     { CARD_ELIXIR,     {5, 5, 5} },
+    { CARD_CLOUD,      {5, 5, 5} },
     END_OF_DECK
 };
 
 const deck_archetype deck_of_destruction[] =
 {
     { CARD_VITRIOL,  {5, 5, 5} },
-    { CARD_CLOUD,    {5, 5, 5} },
     { CARD_HAMMER,   {5, 5, 5} },
     { CARD_VENOM,    {5, 5, 5} },
     { CARD_STORM,    {5, 5, 5} },
@@ -331,7 +331,7 @@ const char* card_name(card_type card)
     case CARD_WARPWRIGHT:      return "Warpwright";
     case CARD_SHAFT:           return "the Shaft";
     case CARD_VITRIOL:         return "Vitriol";
-    case CARD_CLOUD:           return "Cloud";
+    case CARD_CLOUD:           return "the Cloud";
     case CARD_HAMMER:          return "the Hammer";
     case CARD_VENOM:           return "Venom";
     case CARD_STORM:           return "the Storm";
@@ -2523,27 +2523,40 @@ static void _cloud_card(int power, deck_rarity_type rarity)
     for (radius_iterator di(you.pos(), LOS_NO_TRANS); di; ++di)
     {
         monster *mons = monster_at(*di);
-        bool make_cloud = false;
-
-        // don't flame the player or allies
-        if (*di == you.pos() || (mons && mons->wont_attack()))
-            continue;
-        else if (grd(*di) == DNGN_FLOOR && env.cgrid(*di) == EMPTY_CLOUD)
+        cloud_type cloudy;
+        
+        switch(power_level)
         {
-            if (mons && x_chance_in_y(power_level + 1, 4))
-                make_cloud = true;
-            else if (x_chance_in_y(power_level + 1, 10))
-                make_cloud = true;
+            case 0: cloudy = coinflip() ? CLOUD_STEAM : CLOUD_MEPHITIC;
+                    break;
+            
+            case 1: cloudy = coinflip() ? CLOUD_FIRE : CLOUD_COLD;
+                     break;
+                     
+            case 2: cloudy = coinflip() ? CLOUD_MIASMA: CLOUD_ACID;
+                    break;
+                    
+            default: cloudy = CLOUD_DEBUGGING;
         }
-
-        if (make_cloud)
+        
+        if (!mons || (mons && mons->wont_attack()))
+            continue;
+            
+        for (adjacent_iterator ai(mons->pos()); ai; ++ai)
         {
-            const int cloud_power = 5 + random2((power_level + 1) * 3);
-            place_cloud(coinflip() ? CLOUD_FIRE : CLOUD_COLD,
-                        *di, cloud_power, &you);
+            // don't place clouds on the player or allies
+            if (*ai == you.pos() || (monster_at(*ai) 
+                && monster_at(*ai)->wont_attack()))
+                continue;
+                
+            if (grd(*ai) == DNGN_FLOOR && env.cgrid(*ai) == EMPTY_CLOUD)
+            {
+                const int cloud_power = 5 + random2((power_level + 1) * 3);
+                place_cloud(cloudy, *ai, cloud_power, &you);
 
-            if (you.see_cell(*di))
-            something_happened = true;
+                if (you.see_cell(*ai))
+                something_happened = true;
+            }
         }
     }
 
