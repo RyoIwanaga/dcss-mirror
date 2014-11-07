@@ -2685,6 +2685,7 @@ static void _degeneration_card(int power, deck_rarity_type rarity)
         {
             effects = true;
             monster_polymorph(mons, RANDOM_MONSTER, PPT_LESS);
+            mons->malmutate("");
         }
     }
 
