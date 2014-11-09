@@ -1020,7 +1020,7 @@ void monster::remove_enchantment_effect(const mon_enchant &me, bool quiet)
                                          "negative energy.");
         }
         break;
-        
+
     case ENCH_RESISTANCE:
         if (!quiet)
             simple_monster_message(this, " is no longer unusually resistant.");

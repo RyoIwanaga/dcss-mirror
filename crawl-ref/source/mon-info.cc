@@ -208,7 +208,7 @@ static monster_info_flags ench_to_mb(const monster& mons, enchant_type ench)
     case ENCH_NEGATIVE_VULN:
         return MB_NEGATIVE_VULN;
     case ENCH_RESISTANCE:
-		return MB_RESISTANCE;
+        return MB_RESISTANCE;
     default:
         return NUM_MB_FLAGS;
     }
@@ -1574,7 +1574,7 @@ vector<string> monster_info::attributes() const
     if (is(MB_NEGATIVE_VULN))
         v.push_back("more vulnerable to negative energy");
     if (is(MB_RESISTANCE))
-		v.push_back("unusually resistant");
+        v.push_back("unusually resistant");
     return v;
 }
 
