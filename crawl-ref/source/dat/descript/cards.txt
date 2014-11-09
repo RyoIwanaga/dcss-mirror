@@ -74,6 +74,12 @@ Wild Magic card
 
 This card causes wild magic, as if from miscasting a spell, to act upon you.
 %%%%
+Placid Magic card
+
+This card suppresses nearby magic -- your magic points will be drained,
+magical enchantments will vanish and hostile spellcasters will
+temporarily be rendered magically inept.
+%%%%
 the Helix card
 
 This card changes your mutations. Higher power levels make the change more
