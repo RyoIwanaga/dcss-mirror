@@ -610,15 +610,15 @@ bool fill_status_info(int status, status_info* inf)
         }
         break;
     }
-    
+
     case DUR_CLEAVE:
     {
-		const item_def* weapon = you.weapon();
-		
-		if (weapon && item_attack_skill(*weapon) == SK_AXES)
-			inf->light_colour = DARKGREY;
-		break;
-	}
+        const item_def* weapon = you.weapon();
+
+        if (weapon && item_attack_skill(*weapon) == SK_AXES)
+            inf->light_colour = DARKGREY;
+        break;
+    }
 
     default:
         if (!found)

@@ -1472,27 +1472,24 @@ static void _velocity_card(int power, deck_rarity_type rarity)
         you.duration[DUR_HASTE] = 1;
         did_something = true;
     }
-    
-    switch(power_level)
+
+    switch (power_level)
     {
         case 0:
-                switch(random2(3))
-                {
-                    case 0: for_allies = for_hostiles = ENCH_SLOW; break;
-                    case 1: for_allies = for_hostiles = ENCH_HASTE; break;
-                    case 2: for_allies = for_hostiles = ENCH_SWIFT; break;
-                }
-                break;
-    
+            for_allies = for_hostiles = random_choose(ENCH_SLOW, ENCH_HASTE,
+                                                      ENCH_SWIFT, -1);
+            break;
+
         case 1:
-                if (coinflip())
-                    for_allies = ENCH_HASTE;
-                else
-                    for_hostiles = ENCH_SLOW;
-                break;
-        
-        case 2: for_allies = ENCH_HASTE; for_hostiles = ENCH_SLOW;
-        break;
+            if (coinflip())
+                for_allies = ENCH_HASTE;
+            else
+                for_hostiles = ENCH_SLOW;
+            break;
+
+        case 2:
+            for_allies = ENCH_HASTE; for_hostiles = ENCH_SLOW;
+            break;
     }
 
     for (radius_iterator ri(you.pos(), LOS_NO_TRANS); ri; ++ri)
@@ -1517,7 +1514,7 @@ static void _velocity_card(int power, deck_rarity_type rarity)
                         do_slow_monster(mon, &you);
                         did_something = true;
                     }
-                    else if(!(for_hostiles == ENCH_HASTE && haste_immune))
+                    else if (!(for_hostiles == ENCH_HASTE && haste_immune))
                     {
                         mon->add_ench(for_hostiles);
                         did_something = true;
@@ -1537,7 +1534,7 @@ static void _velocity_card(int power, deck_rarity_type rarity)
                         do_slow_monster(mon, &you);
                         did_something = true;
                     }
-                    else if(!(for_allies == ENCH_HASTE && haste_immune))
+                    else if (!(for_allies == ENCH_HASTE && haste_immune))
                     {
                         mon->add_ench(for_allies);
                         did_something = true;
@@ -1551,7 +1548,7 @@ static void _velocity_card(int power, deck_rarity_type rarity)
 
             if (did_haste)
                 simple_monster_message(mon, " seems to speed up.");
-            
+
             if (did_swift)
                 simple_monster_message(mon, " is moving somewhat quickly.");
         }
@@ -1564,11 +1561,11 @@ static void _velocity_card(int power, deck_rarity_type rarity)
 static void _banshee_card(int power, deck_rarity_type rarity)
 {
     const int power_level = _get_power_level(power, rarity);
-    
+
     for (radius_iterator ri(you.pos(), LOS_NO_TRANS); ri; ++ri)
     {
         monster* mon = monster_at(*ri);
-        
+
         if (mon && !mon->wont_attack())
             mon->drain_exp(&you, false, 3 * (power_level + 1));
     }
@@ -1641,7 +1638,7 @@ static void _warpwright_card(int power, deck_rarity_type rarity)
 static void _shaft_card(int power, deck_rarity_type rarity)
 {
     const int power_level = _get_power_level(power, rarity);
-    
+
     if (is_valid_shaft_level())
     {
         if (grd(you.pos()) == DNGN_FLOOR
@@ -1650,15 +1647,17 @@ static void _shaft_card(int power, deck_rarity_type rarity)
             find_trap(you.pos())->reveal();
             mpr("A shaft materialises beneath you!");
         }
-        
+
         for (radius_iterator di(you.pos(), LOS_NO_TRANS); di; ++di)
         {
             monster *mons = monster_at(*di);
-            
+
             if (mons && !mons->wont_attack()
                 && grd(mons->pos()) == DNGN_FLOOR
                 && !mons->airborne() && x_chance_in_y(power_level, 3))
+            {
                 mons->do_shaft();
+            }
         }
     }
     else
@@ -1733,7 +1732,6 @@ static void _damaging_card(card_type card, int power, deck_rarity_type rarity,
         break;
 
     case CARD_VENOM:
-        {
         if (power_level < 2)
             venom_vuln = true;
 
@@ -1742,7 +1740,6 @@ static void _damaging_card(card_type card, int power, deck_rarity_type rarity,
         else
             ztype = ZAP_VENOM_BOLT;
         break;
-        }
 
     case CARD_HAMMER:  ztype = hammerzaps[power_level];  break;
     case CARD_ORB:     ztype = orbzaps[power_level];     break;
@@ -1751,26 +1748,26 @@ static void _damaging_card(card_type card, int power, deck_rarity_type rarity,
         if (power_level == 2)
         {
             mprf("You have %s %s.", participle, card_name(card));
-            
+
             if (monster *ghost = create_monster(
-                                    mgen_data(MONS_FLAYED_GHOST, BEH_FRIENDLY, 
+                                    mgen_data(MONS_FLAYED_GHOST, BEH_FRIENDLY,
                                     &you, 3, 0, you.pos(), MHITYOU)))
             {
                 bool msg = true;
                 bolt beem;
-                
+
                 beem.origin_spell = SPELL_FLAY;
                 beem.source = ghost->pos();
                 beem.source_id = ghost->mid;
                 beem.range = 0;
-                
+
                 if (!you.res_torment())
                     dec_hp(5, false);
-                
+
                 for (radius_iterator di(ghost->pos(), LOS_NO_TRANS); di; ++di)
                 {
                     monster *mons = monster_at(*di);
-                    
+
                     if (mons && !mons->wont_attack())
                     {
                         beem.target = mons->pos();
@@ -1780,10 +1777,10 @@ static void _damaging_card(card_type card, int power, deck_rarity_type rarity,
                         msg = false;
                     }
                 }
-                
+
                 ghost->foe = MHITYOU;
             }
-                              
+
             return;
         }
         else
@@ -1861,14 +1858,16 @@ static void _elixir_card(int power, deck_rarity_type rarity)
         you.set_duration(DUR_ELIXIR_HEALTH, 10);
         you.set_duration(DUR_ELIXIR_MAGIC, 10);
     }
-    
+
     for (radius_iterator ri(you.pos(), LOS_NO_TRANS); ri; ++ri)
     {
         monster* mon = monster_at(*ri);
-        
+
         if (mon && mon->wont_attack())
+        {
             mon->add_ench(mon_enchant(ENCH_EPHEMERAL_INFUSION, 50 * (power_level + 1),
                                       &you, dur));
+        }
     }
 }
 
@@ -1917,11 +1916,11 @@ static void _helm_card(int power, deck_rarity_type rarity)
             mpr("A magical shield forms in front of you.");
         you.increase_duration(DUR_MAGIC_SHIELD, random2(power/6) + 1);
     }
-    
+
     for (radius_iterator ri(you.pos(), LOS_NO_TRANS); ri; ++ri)
     {
         monster* mon = monster_at(*ri);
-        
+
         if (mon && mon->wont_attack() && x_chance_in_y(power_level, 2))
             mon->add_ench(coinflip() ? ENCH_STONESKIN : ENCH_SHROUD);
     }
@@ -1942,7 +1941,7 @@ static void _blade_card(int power, deck_rarity_type rarity)
     if (!cleaving)
     {
         mprf(MSGCH_DURATION,
-             "%s look%s %ssharp%s", 
+             "%s look%s %ssharp%s",
              (weapon) ? weapon->name(DESC_YOUR).c_str() : hand_part.c_str(),
              (plural) ?  "" : "s", (bladed) ? "" : "oddly ",
              (axe) ? " (like it always does)." : ".");
@@ -1992,12 +1991,12 @@ static void _potion_card(int power, deck_rarity_type rarity)
     }
 
     potion_effect(pot, random2(power/4));
-    
+
     for (radius_iterator ri(you.pos(), LOS_NO_TRANS); ri; ++ri)
     {
         monster* mon = monster_at(*ri);
-        
-        if (mon && mon->attitude == ATT_FRIENDLY)
+
+        if (mon && mon->friendly())
             mon->drink_potion_effect(pot, true);
     }
 
@@ -2274,12 +2273,12 @@ static void _summon_demon_card(int power, deck_rarity_type rarity)
     {
         mpr("You see a puff of smoke.");
     }
-    
+
     create_monster(
             mgen_data(dct2,
                       BEH_FRIENDLY, &you, 5 - power_level, 0, you.pos(), MHITYOU,
                       MG_AUTOFOE));
- 
+
 }
 
 static void _elements_card(int power, deck_rarity_type rarity)
@@ -2294,13 +2293,14 @@ static void _elements_card(int power, deck_rarity_type rarity)
        {MONS_ICE_BEAST, MONS_POLAR_BEAR, MONS_ICE_DRAGON}
     };
 
-    int start = random2(4);
-    
+    int start = random2(ARRAYSZ(element_list));
+
     for (int i = 0; i < 3; ++i)
     {
         create_monster(
-            mgen_data(element_list[start % 4][power_level], BEH_FRIENDLY,
-                &you, power_level + 2, 0, you.pos(), MHITYOU, MG_AUTOFOE));
+            mgen_data(element_list[start % ARRAYSZ(element_list)][power_level],
+                BEH_FRIENDLY, &you, power_level + 2, 0, you.pos(), MHITYOU,
+                MG_AUTOFOE));
         start++;
     }
 
@@ -2362,7 +2362,7 @@ static void _summon_dancing_weapon(int power, deck_rarity_type rarity)
         }
 
         item_colour(wpn);
-        
+
         // sometimes give a randart instead
         if (one_chance_in(3))
         {
@@ -2489,7 +2489,7 @@ static void _summon_ugly(int power, deck_rarity_type rarity)
     {
         mpr("You see a puff of smoke.");
     }
-    
+
     if (power_level == 2)
     {
         create_monster(mgen_data(MONS_UGLY_THING,
@@ -2498,7 +2498,7 @@ static void _summon_ugly(int power, deck_rarity_type rarity)
                         min(power/50 + 1, 5), 0,
                         you.pos(), MHITYOU, MG_AUTOFOE));
     }
-        
+
 }
 
 static void _mercenary_card(int power, deck_rarity_type rarity)
@@ -2634,31 +2634,33 @@ static void _cloud_card(int power, deck_rarity_type rarity)
     {
         monster *mons = monster_at(*di);
         cloud_type cloudy;
-        
-        switch(power_level)
+
+        switch (power_level)
         {
             case 0: cloudy = coinflip() ? CLOUD_STEAM : CLOUD_MEPHITIC;
                     break;
-            
+
             case 1: cloudy = coinflip() ? CLOUD_FIRE : CLOUD_COLD;
                      break;
-                     
+
             case 2: cloudy = coinflip() ? CLOUD_MIASMA: CLOUD_ACID;
                     break;
-                    
+
             default: cloudy = CLOUD_DEBUGGING;
         }
-        
+
         if (!mons || (mons && mons->wont_attack()))
             continue;
-            
+
         for (adjacent_iterator ai(mons->pos()); ai; ++ai)
         {
             // don't place clouds on the player or allies
-            if (*ai == you.pos() || (monster_at(*ai) 
+            if (*ai == you.pos() || (monster_at(*ai)
                 && monster_at(*ai)->wont_attack()))
+            {
                 continue;
-                
+            }
+
             if (grd(*ai) == DNGN_FLOOR && env.cgrid(*ai) == EMPTY_CLOUD)
             {
                 const int cloud_power = 5 + random2((power_level + 1) * 3);
@@ -2695,10 +2697,10 @@ static void _fortitude_card(int power, deck_rarity_type rarity)
 static void _storm_card(int power, deck_rarity_type rarity)
 {
     const int power_level = _get_power_level(power, rarity);
-    
+
     if (coinflip())
     {
-        int num_to_summ = 1 + random2(1 + power_level);
+        const int num_to_summ = 1 + random2(1 + power_level);
         for (int i = 0; i < num_to_summ; ++i)
         {
             create_monster(
@@ -2708,7 +2710,7 @@ static void _storm_card(int power, deck_rarity_type rarity)
         }
     }
     else
-    {    
+    {
         big_cloud(CLOUD_STORM, &you, you.pos(),
                    50 + (power_level > 0) ? random2(20) : 0, 20 + random2(8));
         wind_blast(&you, (power_level == 0) ? 100 : 200, coord_def(), true);
@@ -2723,18 +2725,18 @@ static void _storm_card(int power, deck_rarity_type rarity)
         {
             coord_def pos;
             int tries = 0;
-            
+
             do
             {
                 random_near_space(&you, you.pos(), pos, true);
                 tries++;
             }
             while (distance2(pos, you.pos()) < 3 && tries < 50);
-            
+
             if (tries > 50)
                 pos = you.pos();
-            
-            
+
+
             if (create_monster(
                         mgen_data(MONS_TWISTER,
                                   BEH_HOSTILE, &you, 1 + random2(power_level + 1),
@@ -2807,26 +2809,26 @@ static void _placid_magic_card(int power, deck_rarity_type rarity)
 {
     const int power_level = _get_power_level(power, rarity);
     const int drain = max(you.magic_points - random2(power_level * 3), 0);
-    
+
     mpr("You feel magic draining away.");
-    
+
     drain_mp(drain);
     debuff_player();
-    
+
     for (radius_iterator di(you.pos(), LOS_NO_TRANS); di; ++di)
     {
         monster *mons = monster_at(*di);
-        
+
         if (mons && !mons->wont_attack())
         {
             debuff_monster(mons);
-            
+
             if (mons->antimagic_susceptible())
             {
-                int duration = 
+                int duration =
                         random2(div_rand_round(power / 3, mons->get_hit_dice()))
                         * BASELINE_DELAY;
-                
+
                 mons->add_ench(mon_enchant(ENCH_ANTIMAGIC, 0, &you,
                                duration));
                 mprf("%s magic leaks into the air.",

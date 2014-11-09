@@ -3756,13 +3756,13 @@ void bolt::affect_player_enchantment(bool resistible)
         cast_tukimas_dance(ench_power, &you);
         obvious_effect = true;
         break;
-        
+
     case BEAM_RESISTANCE:
         potion_effect(POT_RESISTANCE, ench_power, nullptr, blame_player);
         obvious_effect = true;
         nasty = false;
         nice  = true;
-        break;        
+        break;
 
     default:
         // _All_ enchantments should be enumerated here!
@@ -5651,7 +5651,7 @@ mon_resist_type bolt::apply_enchantment_to_monster(monster* mon)
         cast_tukimas_dance(ench_power, mon);
         obvious_effect = true;
         break;
-        
+
     case BEAM_RESISTANCE:
         if (!mon->has_ench(ENCH_RESISTANCE)
             && mon->add_ench(ENCH_RESISTANCE))
@@ -5659,7 +5659,7 @@ mon_resist_type bolt::apply_enchantment_to_monster(monster* mon)
             if (simple_monster_message(mon, " suddenly seems more resistant."))
                 obvious_effect = true;
         }
-        return MON_AFFECTED;        
+        return MON_AFFECTED;
 
     default:
         break;
@@ -6488,7 +6488,7 @@ static string _beam_type_name(beam_type type)
     case BEAM_TUKIMAS_DANCE:         return "tukima's dance";
     case BEAM_BOUNCY_TRACER:         return "bouncy tracer";
     case BEAM_DEATH_RATTLE:          return "breath of the dead";
-    case BEAM_RESISTANCE:			  return "resistance";
+    case BEAM_RESISTANCE:            return "resistance";
 
     case NUM_BEAMS:                  die("invalid beam type");
     }

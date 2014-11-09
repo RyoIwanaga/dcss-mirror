@@ -3944,9 +3944,9 @@ int monster::res_fire() const
 
     if (has_ench(ENCH_FIRE_VULN))
         u--;
-        
+
     if (has_ench(ENCH_RESISTANCE))
-		u++;
+        u++;
 
     if (u < -3)
         u = -3;
@@ -3995,9 +3995,9 @@ int monster::res_cold() const
         if (w && w->base_type == OBJ_STAVES && w->sub_type == STAFF_COLD)
             u++;
     }
-    
+
     if (has_ench(ENCH_RESISTANCE))
-		u++;
+        u++;
 
     if (u < -3)
         u = -3;
@@ -4037,7 +4037,7 @@ int monster::res_elec() const
     }
 
     if (has_ench(ENCH_RESISTANCE))
-		u++;
+        u++;
 
     // Monsters can legitimately get multiple levels of electricity resistance.
 
@@ -4097,9 +4097,9 @@ int monster::res_poison(bool temp) const
         if (w && w->base_type == OBJ_STAVES && w->sub_type == STAFF_POISON)
             u++;
     }
-    
+
     if (has_ench(ENCH_RESISTANCE))
-		u++;
+        u++;
 
     // Monsters can have multiple innate levels of poison resistance, but
     // like players, equipment doesn't stack.
@@ -4256,11 +4256,11 @@ bool monster::res_corr(bool calc_unid, bool items) const
 int monster::res_acid(bool calc_unid) const
 {
     int u = max(get_mons_resist(this, MR_RES_ACID), (int)actor::res_corr(calc_unid));
-    
+
     if (has_ench(ENCH_RESISTANCE))
-		u++;
-		
-	return u;
+        u++;
+
+    return u;
 }
 
 int monster::res_magic() const
@@ -5989,7 +5989,7 @@ bool monster::should_drink_potion(potion_type ptype) const
     case POT_AGILITY:
         return !has_ench(ENCH_AGILE);
     case POT_RESISTANCE:
-		return !has_ench(ENCH_RESISTANCE);
+        return !has_ench(ENCH_RESISTANCE);
     case POT_INVISIBILITY:
         // We're being nice: friendlies won't go invisible if the player
         // won't be able to see them.
@@ -6003,10 +6003,11 @@ bool monster::should_drink_potion(potion_type ptype) const
 }
 
 // Return the ID status gained.
-item_type_id_state_type monster::drink_potion_effect(potion_type pot_eff, bool card)
+item_type_id_state_type monster::drink_potion_effect(potion_type pot_eff,
+                                                     bool card)
 {
     if (!card)
-		simple_monster_message(this, " drinks a potion.");
+        simple_monster_message(this, " drinks a potion.");
 
     item_type_id_state_type ident = ID_MON_TRIED_TYPE;
 
@@ -6070,7 +6071,7 @@ item_type_id_state_type monster::drink_potion_effect(potion_type pot_eff, bool c
         if (enchant_actor_with_flavour(this, this, BEAM_AGILITY))
             ident = ID_KNOWN_TYPE;
         break;
-        
+
     case POT_RESISTANCE:
         if (enchant_actor_with_flavour(this, this, BEAM_RESISTANCE))
             ident = ID_KNOWN_TYPE;
