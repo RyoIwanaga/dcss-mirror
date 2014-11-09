@@ -76,9 +76,8 @@ This card causes wild magic, as if from miscasting a spell, to act upon you.
 %%%%
 Placid Magic card
 
-This card suppresses nearby magic -- your magic points will be drained,
-magical enchantments will vanish and hostile spellcasters will
-temporarily be rendered magically inept.
+This card suppresses nearby magic. Your magic is drained, enchantments vanish
+and foes are rendered temporarily inept at sorcery.
 %%%%
 the Helix card
 
