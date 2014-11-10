@@ -2819,22 +2819,21 @@ static void _placid_magic_card(int power, deck_rarity_type rarity)
     {
         monster *mons = monster_at(*di);
 
-        if (mons && !mons->wont_attack())
-        {
-            debuff_monster(mons);
+        if (!mons || mons->wont_attack())
+            continue;
 
-            if (mons->antimagic_susceptible())
-            {
-                int duration =
-                        random2(div_rand_round(power / 3, mons->get_hit_dice()))
-                        * BASELINE_DELAY;
+        debuff_monster(mons);
+        if (!mons->antimagic_susceptible())
+            continue;
 
-                mons->add_ench(mon_enchant(ENCH_ANTIMAGIC, 0, &you,
-                               duration));
-                mprf("%s magic leaks into the air.",
-                      apostrophise(mons->name(DESC_THE)).c_str());
-            }
-        }
+        // XXX: this should be refactored together with other effects that
+        // apply antimagic.
+        const int duration = random2(div_rand_round(power / 3,
+                                                    mons->get_hit_dice()))
+                             * BASELINE_DELAY;
+        mons->add_ench(mon_enchant(ENCH_ANTIMAGIC, 0, &you, duration));
+        mprf("%s magic leaks into the air.",
+             apostrophise(mons->name(DESC_THE)).c_str());
     }
 }
 
