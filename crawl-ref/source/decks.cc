@@ -1769,14 +1769,15 @@ static void _damaging_card(card_type card, int power, deck_rarity_type rarity,
                 {
                     monster *mons = monster_at(*di);
 
-                    if (mons && !mons->wont_attack())
-                    {
+                    if (!mons || mons->wont_attack()
+                        || mons->holiness() != MH_NATURAL)
+                        continue;
+                        
                         beem.target = mons->pos();
                         ghost->foe = mons->mindex();
                         mons_cast(ghost, beem, SPELL_FLAY,
                                   ghost->spell_slot_flags(SPELL_FLAY), msg);
                         msg = false;
-                    }
                 }
 
                 ghost->foe = MHITYOU;
