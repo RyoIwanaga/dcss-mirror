@@ -36,7 +36,7 @@ the Tomb card
 The card depicts a royal crypt, its entrance sealed by a heavy stone slab.
 
 Drawing this card entombs its user in protective, temporary walls of solid rock.
-At lower power levels or with adjascent creatures, the tomb may be imperfect.
+At lower power levels or with adjacent creatures, the tomb may be imperfect.
 %%%%
 the Banshee card
 
@@ -80,7 +80,7 @@ the Cloud card
 The card depicts an iron gate enshrouded in mist.
 
 This card imprisons the user's foes in rings of clouds. The type of clouds
-produced will improve with spellpower.
+produced will improve with card power.
 %%%%
 # Destruction
 Vitriol card
@@ -125,7 +125,7 @@ Drawing this card unleashes one or possibly more destructive orbs of pure magic.
 %%%%
 Degeneration card
 
-The card depicts an dragon whose scales are sloughing off, revealing a sheep
+The card depicts a dragon whose scales are sloughing off, revealing a sheep
 underneath.
 
 Drawing this card will attempt to polymorph and malmutate nearby enemies into
@@ -134,7 +134,7 @@ weaker forms.
 # Battle
 the Potion card
 
-The card depicts an long-unvisted wine rack, with each bottle's label coated
+The card depicts a long-unvisited wine rack, with each bottle's label coated
 in dust.
 
 Drawing this card has the same effect, positive or negative, as drinking one
@@ -149,7 +149,7 @@ bearing a red pennant.
 
 Drawing this card increases the user's defences. It may provide boosts to
 armour, evasion, shielding and resistances. With high power, allies may also
-recieve a mild defensive boost.
+receive a mild defensive boost.
 %%%%
 the Blade card
 
@@ -236,8 +236,8 @@ the Dance card
 The card depicts an extravagantly-dressed, masked figure dancing alone in a
 vast room.
 
-Drawing this card summons a dancing weapon. Its quality, brand, and friendliness
-are all affected by card power.
+Drawing this card will summon a dancing weapon. Its quality, brand, and
+friendliness are all affected by card power.
 %%%%
 Foxfire card
 
@@ -248,9 +248,10 @@ be hostile.
 %%%%
 the Rangers card
 
-The card depicts an arrow in a bullseye, which has been split by a second arrow.
+The card depicts an arrow in a bull's-eye, which has been split by a second
+arrow.
 
-Drawing this card will summons several archers.
+Drawing this card will summon several archers.
 %%%%
 Repulsiveness card
 
@@ -264,7 +265,7 @@ the Illusion card
 The card depicts someone standing in a hall of mirrors, surrounded by their own
 reflections.
 
-Drawing this card will summons an illusion of the user. Its power will depend
+Drawing this card will summon an illusion of the user. Its power will depend
 upon one's own.
 %%%%
 # Oddities
