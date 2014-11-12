@@ -2714,12 +2714,26 @@ static void _storm_card(int power, deck_rarity_type rarity)
     }
     else
     {
-        big_cloud(CLOUD_STORM, &you, you.pos(),
-                   50 + (power_level > 0) ? random2(20) : 0, 20 + random2(8));
         wind_blast(&you, (power_level == 0) ? 100 : 200, coord_def(), true);
-        // remove the cloud under the player
-        if (env.cloud[env.cgrid(you.pos())].type == CLOUD_STORM)
-            env.cgrid(you.pos()) = EMPTY_CLOUD;
+        
+        for (radius_iterator ri(you.pos(), 5, C_ROUND, LOS_SOLID); ri; ++ri)
+        {
+            monster *mons = monster_at(*ri);
+            
+            if (adjacent(*ri, you.pos()))
+                continue;
+            
+            if (mons && mons->wont_attack())
+                continue;
+                
+        
+            if ((grd(*ri) == DNGN_FLOOR || feat_is_water(grd(*ri)))
+                && env.cgrid(*ri) == EMPTY_CLOUD)
+            {
+                place_cloud(CLOUD_STORM, *ri,
+                            5 + (power_level + 1) * random2(10), & you);
+            }
+        }
     }
 
     if (power_level > 1 || (power_level == 1 && coinflip()))
