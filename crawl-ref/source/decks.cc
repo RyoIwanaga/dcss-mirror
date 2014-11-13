@@ -2746,9 +2746,8 @@ static void _cloud_card(int power, deck_rarity_type rarity)
 
         for (adjacent_iterator ai(mons->pos()); ai; ++ai)
         {
-            // don't place clouds on the player or allies
-            if (*ai == you.pos() || (monster_at(*ai)
-                && monster_at(*ai)->wont_attack()))
+            // don't place clouds on the player or monsters
+            if (*ai == you.pos() || monster_at(*ai))
             {
                 continue;
             }
