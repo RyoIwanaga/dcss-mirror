@@ -208,7 +208,7 @@ void monster::add_enchantment_effect(const mon_enchant &ench, bool quiet)
         // something has submerged.
         if (!quiet && mons_near(this))
         {
-            if (type == MONS_AIR_ELEMENTAL)
+            if (type == MONS_AIR_ELEMENTAL && !mons_aligned(this, &you))
             {
                 mprf("%s merges itself into the air.",
                      name(DESC_A, true).c_str());
@@ -754,7 +754,7 @@ void monster::remove_enchantment_effect(const mon_enchant &me, bool quiet)
                     seen_context = SC_JUST_SEEN;
                 }
 
-                if (type == MONS_AIR_ELEMENTAL)
+                if (type == MONS_AIR_ELEMENTAL && !mons_aligned(this, &you))
                 {
                     mprf(channel, "%s forms itself from the air!",
                                   name(DESC_A, true).c_str());
