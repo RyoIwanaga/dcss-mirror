@@ -2370,7 +2370,7 @@ mon_spell_slot drac_breath(monster_type drac_type)
     return slot;
 }
 
-static void _mons_load_spells(monster* mon)
+void mons_load_spells(monster* mon)
 {
     vector<mon_spellbook_type> books = _mons_spellbook_list(mon->type);
     const mon_spellbook_type book = books[random2(books.size())];
@@ -2609,7 +2609,7 @@ void define_monster(monster* mons)
 
     mons->bind_melee_flags();
 
-    _mons_load_spells(mons);
+    mons_load_spells(mons);
     mons->bind_spell_flags();
 
     // Reset monster enchantments.
